@@ -1,16 +1,21 @@
 <?php
-$mysqli = new mysqli("localhost", "esmaeill", "15031374", "datarain");
+// Database connection
+$servername = "localhost";
+$username = "lapvtpsb_esmaeill";
+$password = "uj2_T7yc]@6V";
+$dbname = "lapvtpsb_datarain";
 
-if ($mysqli->connect_error) {
-    die("Connection failed: " . $mysqli->connect_error);
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['query'])) {
-        $query = $mysqli->real_escape_string($_POST['query']);
+        $query = $conn->real_escape_string($_POST['query']);
 
         $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' AND description LIKE '%$query%' ORDER BY `ID` ASC";
-        $result = $mysqli->query($sql);
+        $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
             $results = [];
@@ -22,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         else
         {
             $sql = "SELECT ID, title, url, description FROM search_results WHERE url LIKE '%$query%' ORDER BY `ID` ASC";
-            $result = $mysqli->query($sql);
+            $result = $conn->query($sql);
 
             if ($result->num_rows > 0) {
                 $results = [];
@@ -34,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             else
             {
                 $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' OR url LIKE '%$query%' OR description LIKE '%$query%' ORDER BY `ID` ASC";
-                $result = $mysqli->query($sql);
+                $result = $conn->query($sql);
 
                 if ($result->num_rows > 0) {
                     $results = [];
@@ -49,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-        $mysqli->close();
+        $conn->close();
     }
 }
 ?>
