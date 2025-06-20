@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     {
         $url = $conn->real_escape_string($_POST['url']);
 
-        $response = @file_get_contents('http://datarain.ir/get_links.php?url=' . urlencode($url));
+        $response = @file_get_contents('https://datarain.ir/get_links.php?url=' . urlencode($url));
         $data = json_decode($response, true);
     }
     else
@@ -99,40 +99,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 
     <?php
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($data) && is_array($data)) {
-
-        $count = 0;
-        if (is_array($data)) {
-            foreach ($data as $item) {
-            if (!empty($item)) {
-                $count++;
-            }
+        $urls = [];
+        foreach ($data as $item) {
+            if (!empty($item) && filter_var($item, FILTER_VALIDATE_URL)) {
+                $urls[] = trim($item);
             }
         }
-        echo '<h3>Results : '.$count.' </h3>';
-        echo '<table border="1" cellpadding="8" style="margin:auto; background:#fff; border-radius:8px;">';
+        $jsUrls = json_encode($urls);
+        echo "<h3>Results : " . count($urls) . " </h3>";
+        echo '<table id="resultsTable" border="1" cellpadding="8" style="margin:auto; background:#fff; border-radius:8px;">';
         echo '<tr><th>#</th><th>URL</th><th>Title</th><th>Description</th></tr>';
-        $k=0;
-        foreach ($data as $i => $itemUrl) {
-            $itemUrl = trim($itemUrl);
-            $title = '';
-            $desc = '';
-            if (filter_var($itemUrl, FILTER_VALIDATE_URL)) {
-                $getTitleResponse = @file_get_contents('http://datarain.ir/get_title.php?url=' . urlencode($itemUrl));
-                $titleData = json_decode($getTitleResponse, true);
-                $title = isset($titleData['title']) ? htmlspecialchars($titleData['title']) : '';
-                $desc = isset($titleData['description']) ? htmlspecialchars($titleData['description']) : '';
-            }
-            echo '<tr>';
-            echo '<td>' . ++$k. '</td>';
-            echo '<td>' . htmlspecialchars($itemUrl) . '</td>';
-            echo '<td>' . $title . '</td>';
-            echo '<td>' . $desc . '</td>';
-            echo '</tr>';
-            flush();
-            ob_flush();
-
-        }
         echo '</table>';
+        echo "<script>window.resultUrls = $jsUrls;</script>";
     }
     ?>
 </body>
@@ -145,6 +123,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         if (captchaImg) {
             captchaImg.addEventListener('click', function() {
                 this.src = 'captcha_image.php?' + Date.now();
+            });
+        }
+
+        // Fetch title/description for each URL and update table
+        if (window.resultUrls && Array.isArray(window.resultUrls)) {
+            const table = document.getElementById('resultsTable');
+            window.resultUrls.forEach((url, idx) => {
+                // Add row with loading placeholders
+                const row = table.insertRow(-1);
+                row.insertCell(0).textContent = idx + 1;
+                row.insertCell(1).textContent = url;
+                row.insertCell(2).textContent = '';
+                row.insertCell(3).textContent = '';
+
+                // Fetch info via AJAX
+                fetch('https://datarain.ir/get_title.php?url=' + encodeURIComponent(url))
+                    .then(res => {
+                        console.log('Fetching:', url, 'Status:', res.status);
+                        if (!res.ok) throw new Error('Network response was not ok');
+                        return res.json();
+                    })
+                    .then(data => {
+                        row.cells[2].textContent = data.title || '';
+                        row.cells[3].textContent = data.description || '';
+                    })
+                    .catch((err) => {
+                        row.cells[2].textContent = 'Error';
+                        row.cells[3].textContent = 'Error';
+                    });
             });
         }
     });

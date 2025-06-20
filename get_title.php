@@ -50,6 +50,7 @@ foreach ($metaTags as $meta) {
 }
 
 header('Content-Type: application/json; charset=utf-8');
+header("Access-Control-Allow-Origin: *");
 echo json_encode([
     'title' => $title,
     'description' => $description
