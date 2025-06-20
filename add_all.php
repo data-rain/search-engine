@@ -134,8 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 const row = table.insertRow(-1);
                 row.insertCell(0).textContent = idx + 1;
                 row.insertCell(1).textContent = url;
-                row.insertCell(2).textContent = '';
-                row.insertCell(3).textContent = '';
+                row.insertCell(2).textContent = '~';
+                row.insertCell(3).textContent = '~';
 
                 // Fetch info via AJAX
                 fetch('https://datarain.ir/get_title.php?url=' + encodeURIComponent(url))
