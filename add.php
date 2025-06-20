@@ -2,6 +2,8 @@
 
 require 'dbpass.php';
 
+if(!isset($_SESSION))session_start();
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -9,7 +11,6 @@ if ($conn->connect_error) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    session_start();
     $_POST['captcha']=strtoupper($_POST['captcha'] );
     if ($_POST['captcha'] === $_SESSION['captcha_code']) {
         $title = $conn->real_escape_string($_POST['title']);
@@ -26,12 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "Invalid CAPTCHA!";
     }
 }
-
-// Generate CAPTCHA code
-if(!isset($_SESSION))session_start();
-$captcha_code = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
-$_SESSION['captcha_code'] = $captcha_code;
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -84,23 +79,6 @@ $_SESSION['captcha_code'] = $captcha_code;
             width: 100%;
         }
     </style>
-    <script type="text/javascript" charset="UTF-8">
-        function fetchTitle() {
-        const url = document.getElementById('url').value;
-        if (!url) return;
-        fetch('get_title.php?url=' + encodeURIComponent(url))
-            .then(response => response.json())
-            .then(data => {
-            if (data.title) {
-                document.getElementById('title').value = data.title;
-            }
-            if (data.description) {
-                document.getElementById('description').value = data.description;
-            }
-            })
-            .catch(() => alert('Error fetching data.'));
-        }
-    </script>
 </head>
 <body>
     <form method="POST" action="" autocomplete="off">
@@ -117,7 +95,10 @@ $_SESSION['captcha_code'] = $captcha_code;
         <label for="description">Description:</label>
         <textarea id="description" name="description" rows="4"></textarea>
 
-        <div class="captcha"><?php echo $captcha_code; ?></div>
+        <div class="captcha">
+            <img src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;">
+        </div>
+
         <label for="captcha">Enter CAPTCHA:</label>
         <input type="text" id="captcha" name="captcha" required>
 
@@ -127,3 +108,31 @@ $_SESSION['captcha_code'] = $captcha_code;
     </form>
 </body>
 </html>
+
+<script type="text/javascript" charset="UTF-8">
+    function fetchTitle() {
+    const url = document.getElementById('url').value;
+    if (!url) return;
+    fetch('get_title.php?url=' + encodeURIComponent(url))
+        .then(response => response.json())
+        .then(data => {
+        if (data.title) {
+            document.getElementById('title').value = data.title;
+        }
+        if (data.description) {
+            document.getElementById('description').value = data.description;
+        }
+        })
+        .catch(() => alert('Error fetching data.'));
+    }
+
+    // Refresh CAPTCHA image when clicked
+    document.addEventListener('DOMContentLoaded', function() {
+        const captchaImg = document.querySelector('.captcha img');
+        if (captchaImg) {
+            captchaImg.addEventListener('click', function() {
+                this.src = 'captcha_image.php?' + Date.now();
+            });
+        }
+    });
+</script>
