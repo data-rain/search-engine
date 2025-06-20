@@ -31,21 +31,11 @@ function getAllLinks($url) {
 if (isset($_GET['url'])) {
     $url = $_GET['url'];
     $links = getAllLinks($url);
-    $valid_links=[];
 
     // Remove duplicate links
     $links = array_unique($links);
 
-    foreach ($links as $link) {
-        $response = @file_get_contents('http://datarain.ir/get_title.php?url=' . urlencode($link));
-        $titleData = json_decode($response, true);
-        if(!empty($titleData['title']))
-        {
-            $valid_links[]=["url"=>$link,"title"=>$titleData['title'],"description"=>$titleData['description']];
-        }
-    }
-
     header('Content-Type: application/json');
-    echo json_encode($valid_links, JSON_PRETTY_PRINT);
+    echo json_encode($links, JSON_PRETTY_PRINT);
 }
 ?>
