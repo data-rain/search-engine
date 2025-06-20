@@ -41,7 +41,6 @@ if(!isset($_SESSION))session_start();
 $captcha_code = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
 $_SESSION['captcha_code'] = $captcha_code;
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -93,7 +92,7 @@ $_SESSION['captcha_code'] = $captcha_code;
             width: 100%;
         }
     </style>
-    <script>
+    <script type="text/javascript" charset="UTF-8">
         function fetchTitle() {
         const url = document.getElementById('url').value;
         if (!url) return;

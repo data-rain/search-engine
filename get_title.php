@@ -29,7 +29,7 @@ if (!$html) {
 // Parse HTML
 libxml_use_internal_errors(true);
 $doc = new DOMDocument();
-$doc->loadHTML($html);
+$doc->loadHTML(mb_convert_encoding($html,'HTML-ENTITIES', 'UTF-8'));
 libxml_clear_errors();
 
 // Get title
@@ -49,7 +49,7 @@ foreach ($metaTags as $meta) {
     }
 }
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 echo json_encode([
     'title' => $title,
     'description' => $description
