@@ -102,8 +102,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+
+    <a href="./add_all.php" style="position: absolute; top: 10px; left: 10px; text-decoration: none;">
+        Add URLs from link
+    </a>
+
     <form method="POST" action="" autocomplete="off">
-        <h2>Add more link</h2>
+        <h2>Add link</h2>
         <label for="url">URL:</label>
         <div style="display: flex; gap: 8px; align-items: center;">
             <input type="url" id="url" name="url" value="http://" required style="flex: 1;">
