@@ -1,5 +1,4 @@
 <?php
-
 require 'dbpass.php';
 
 session_start();
@@ -93,8 +92,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         <label for="captcha">Enter CAPTCHA:</label>
         <input type="text" id="captcha" name="captcha" required>
 
-        <button type="button" onclick="window.location.href='..'">Back</button>
         <button type="submit" style="font-weight: bold; width:50%;"> Search </button>
+        <button type="button" onclick="window.location.href='..'">Back</button>
+
     </form>
 
     <?php
@@ -130,6 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             echo '</tr>';
             flush();
             ob_flush();
+
         }
         echo '</table>';
     }
