@@ -161,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         echo '<form id="saveForm" style="max-width:400px;margin:32px auto 0 auto;padding:24px;border:2px solid #007BFF;border-radius:12px;background:#f9f9f9;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;flex-direction:column;align-items:center;">';
         echo '<div style="display:flex;align-items:center;width:100%;margin-bottom:16px;">';
         echo '<img id="saveCaptchaImg" src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;cursor:pointer;margin-right:12px;border-radius:6px;border:1px solid #ccc;">';
-        echo '<input type="text" id="saveCaptchaInput" placeholder="Enter CAPTCHA" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;">';
+        echo '<input type="text" id="saveCaptchaInput" placeholder="Enter CAPTCHA" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;" required>';
         echo '</div>';
         echo '<button id="saveAllBtn" type="submit" style="width:100%;padding:12px 0;font-size:1.1em;font-weight:bold;background:#007BFF;color:#fff;border:none;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,0.06);transition:background 0.2s;">Save All to Database</button>';
         echo '</form>';
