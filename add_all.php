@@ -153,9 +153,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             </script>";
 
         echo "<h3>Results : " . count($urls) . " </h3>";
-        echo '<table id="resultsTable" border="1" cellpadding="8" style="margin:auto; background:#fff; border-radius:8px;">';
+        echo '<div style="overflow-x:auto; max-width:100vw; margin:auto;">'; // Add this wrapper div
+        echo '<table id="resultsTable" border="1" cellpadding="8" style="margin:auto; background:#fff; border-radius:8px; min-width:600px;">';
         echo '<tr><th>#</th><th>URL</th><th>Title</th><th>Description</th></tr>';
         echo '</table>';
+        echo '</div>';
         echo '<form id="saveForm" style="max-width:400px;margin:32px auto 0 auto;padding:24px;border:2px solid #007BFF;border-radius:12px;background:#f9f9f9;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;flex-direction:column;align-items:center;">';
         echo '<div style="display:flex;align-items:center;width:100%;margin-bottom:16px;">';
         echo '<img id="saveCaptchaImg" src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;cursor:pointer;margin-right:12px;border-radius:6px;border:1px solid #ccc;">';
@@ -242,10 +244,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         // Fetch title/description for each URL and update table
         if (window.resultUrls && Array.isArray(window.resultUrls)) {
             const table = document.getElementById('resultsTable');
-            window.resultUrls.forEach((url, idx) => {
+            var idc=0;
+            window.resultUrls.forEach((url) => {
                 // Add row with loading placeholders
                 const row = table.insertRow(-1);
-                row.insertCell(0).textContent = idx + 1;
+                row.insertCell(0).textContent = ++idc;
                 row.insertCell(1).textContent = url;
                 row.insertCell(2).textContent = '~';
                 row.insertCell(3).textContent = '~';

@@ -9,9 +9,11 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$responseMsg = '';
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_POST['captcha']=strtoupper($_POST['captcha'] );
+    $_POST['captcha'] = strtoupper($_POST['captcha']);
     if ($_POST['captcha'] === $_SESSION['captcha_code']) {
         $title = $conn->real_escape_string($_POST['title']);
         $url = $conn->real_escape_string($_POST['url']);
@@ -19,12 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $sql = "INSERT INTO search_results (title, url, description) VALUES ('$title', '$url', '$description')";
         if ($conn->query($sql) === TRUE) {
-            echo "Record added successfully!";
+            $responseMsg = '<div class="alert success">✅ Record added successfully!</div>';
         } else {
-            echo "Error: " . $sql . "<br>" . $conn->error;
+            $responseMsg = '<div class="alert error">❌ Error: ' . htmlspecialchars($conn->error) . '</div>';
         }
     } else {
-        echo "Invalid CAPTCHA!";
+        $responseMsg = '<div class="alert error">❌ Invalid CAPTCHA!</div>';
     }
 }
 ?>
@@ -78,6 +80,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 10px;
             width: 100%;
         }
+        .alert {
+            padding: 14px 18px;
+            margin-bottom: 18px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #b7e0c3;
+        }
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -106,6 +127,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="button" onclick="window.location.href='..'">Back</button>
 
     </form>
+    <div id="responseMsg" style="max-width:400px;margin:20px auto 0 auto;">
+        <?php if (!empty($responseMsg)) echo $responseMsg; ?>
+    </div>
 </body>
 </html>
 
