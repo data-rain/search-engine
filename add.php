@@ -1,13 +1,19 @@
 <?php
-// Database connection
-$servername = "localhost";
-$username = "lapvtpsb_esmaeill";
-$password = "uj2_T7yc]@6V";
-$dbname = "lapvtpsb_datarain";
+
+require 'dbpass.php';
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
+}
+
+function get_title($url){
+  $str = file_get_contents($url);
+  if(strlen($str)>0){
+    $str = trim(preg_replace('/\s+/', ' ', $str)); // supports line breaks inside <title>
+    preg_match("/\<title\>(.*)\<\/title\>/i",$str,$title); // ignore case
+    return $title[1];
+  }
 }
 
 // Handle form submission
@@ -87,24 +93,44 @@ $_SESSION['captcha_code'] = $captcha_code;
             width: 100%;
         }
     </style>
+    <script>
+        function fetchTitle() {
+        const url = document.getElementById('url').value;
+        if (!url) return;
+        fetch('get_title.php?url=' + encodeURIComponent(url))
+            .then(response => response.json())
+            .then(data => {
+            if (data.title) {
+                document.getElementById('title').value = data.title;
+            }
+            if (data.description) {
+                document.getElementById('description').value = data.description;
+            }
+            })
+            .catch(() => alert('Error fetching data.'));
+        }
+    </script>
 </head>
 <body>
-    <form method="POST" action="">
-        <h2>Submit Form</h2>
+    <form method="POST" action="" autocomplete="off">
+        <h2>Add more link</h2>
+        <label for="url">URL:</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="url" id="url" name="url" value="http://" required style="flex: 1;">
+            <button type="button" onclick="fetchTitle()" style="padding: 10px 14px;">Get info</button>
+        </div>
+
         <label for="title">Title:</label>
         <input type="text" id="title" name="title" required>
 
-        <label for="url">URL:</label>
-        <input type="url" id="url" name="url" required>
-
         <label for="description">Description:</label>
-        <textarea id="description" name="description" rows="4" required></textarea>
+        <textarea id="description" name="description" rows="4"></textarea>
 
         <div class="captcha"><?php echo $captcha_code; ?></div>
         <label for="captcha">Enter CAPTCHA:</label>
         <input type="text" id="captcha" name="captcha" required>
 
-        <button type="submit">Submit</button>
+        <button type="submit" style="font-weight: bold;">Add to Database</button>
         <button type="button" onclick="window.location.href='..'">Back</button>
 
     </form>

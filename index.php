@@ -1,9 +1,6 @@
 <?php
-// Database connection
-$servername = "localhost";
-$username = "lapvtpsb_esmaeill";
-$password = "uj2_T7yc]@6V";
-$dbname = "lapvtpsb_datarain";
+
+require 'dbpass.php';
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -17,43 +14,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' AND description LIKE '%$query%' ORDER BY `ID` ASC";
         $result = $conn->query($sql);
 
+        $results = [];
+        $result_counter=0;
+
         if ($result->num_rows > 0) {
-            $results = [];
             while ($row = $result->fetch_assoc())
             {
                 $results[] = $row;
+                $result_counter++;
             }
         }
-        else
+
+        if($result_counter<=50)
         {
             $sql = "SELECT ID, title, url, description FROM search_results WHERE url LIKE '%$query%' ORDER BY `ID` ASC";
             $result = $conn->query($sql);
 
             if ($result->num_rows > 0) {
-                $results = [];
                 while ($row = $result->fetch_assoc())
                 {
                     $results[] = $row;
-                }
-            }
-            else
-            {
-                $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' OR url LIKE '%$query%' OR description LIKE '%$query%' ORDER BY `ID` ASC";
-                $result = $conn->query($sql);
-
-                if ($result->num_rows > 0) {
-                    $results = [];
-                    while ($row = $result->fetch_assoc())
-                    {
-                        $results[] = $row;
-                    }
-                }
-                else
-                {
-                    $results = [];
+                    $result_counter++;
                 }
             }
         }
+
+        if($result_counter<=100)
+        {
+            $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' OR url LIKE '%$query%' OR description LIKE '%$query%' ORDER BY `ID` ASC";
+            $result = $conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc())
+                {
+                    $results[] = $row;
+                    $result_counter++;
+                }
+            }
+        }
+
         $conn->close();
     }
 }
@@ -65,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DataRain Search Engine</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -146,23 +146,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="rain"></div>
 
     <a href="./add.php" style="position: absolute; top: 10px; left: 10px; text-decoration: none;">
-        <button style="padding-top: 1px; padding-bottom: 6px; padding-right: 9px; padding-left: 8px; border: none; background-color: #007BFF; color: white; border-radius: 5px; cursor: pointer;">
-        <span style="font-size: 1.3rem; font-weight: bold;"> + </span>
+        <button style="border: none; background-color: #007BFF; color: white; border-radius: 5px; cursor: pointer;">
+            <span style="font-size: 1.1rem; font-weight: bold;"> Add Link </span>
         </button>
     </a>
 
     <div class="search-container">
         <a href="./index.php" style="text-decoration:none"><h1>DataRain</h1></a>
-        <form action="index.php" method="POST" style="display: inline-block;">
-            <input type="text" name="query" placeholder="Enter your search term..." required>
-            <input type="submit" value="Search">
+        <form action="" method="POST" style="display: inline-block;" autocomplete="off">
+            <input type="text" name="query" placeholder="Enter your search term..." required autofocus>
+            <input type="submit" style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;" value="Search">
         </form>
 
     </div>
     <?php
     if (isset($results)) {
         echo '<div class="search-results">';
-        echo '<t4>Search Results for "' . $query . '"</t4>';
+        echo '<t4>Search: '.$result_counter.' Results for "' . $query . '"</t4>';
         echo '<ul>';
         foreach ($results as $result) {
             echo '<li style="margin-bottom: 20px; display: flex; align-items: center;">';
@@ -179,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ?>
     <script>
         const rainContainer = document.querySelector('.rain');
-        const numberOfDrops = 10;
+        const numberOfDrops = 7;
 
         for (let i = 0; i < numberOfDrops; i++) {
             const drop = document.createElement('div');
