@@ -7,11 +7,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+{
     if (isset($_POST['query'])) {
         $query = $conn->real_escape_string($_POST['query']);
 
-        $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' AND description LIKE '%$query%' ORDER BY `ID` ASC";
+        $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' OR url LIKE '%$query%' OR description LIKE '%$query%' ORDER BY `clicks` DESC";
         $result = $conn->query($sql);
 
         $results = [];
@@ -25,36 +26,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        if($result_counter<=50)
-        {
-            $sql = "SELECT ID, title, url, description FROM search_results WHERE url LIKE '%$query%' ORDER BY `ID` ASC";
-            $result = $conn->query($sql);
-
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc())
-                {
-                    $results[] = $row;
-                    $result_counter++;
-                }
-            }
-        }
-
-        if($result_counter<=100)
-        {
-            $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' OR url LIKE '%$query%' OR description LIKE '%$query%' ORDER BY `ID` ASC";
-            $result = $conn->query($sql);
-
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc())
-                {
-                    $results[] = $row;
-                    $result_counter++;
-                }
-            }
-        }
-
         $conn->close();
     }
+}
+else if (isset($_GET['visit']))
+{
+    $visit_id = intval($_GET['visit']);
+    if (!$conn->connect_error) {
+        $conn->query("UPDATE search_results SET clicks = clicks + 1 WHERE ID = $visit_id");
+        $res = $conn->query("SELECT url FROM search_results WHERE ID = $visit_id");
+        if ($res && $row = $res->fetch_assoc()) {
+            $url = $row['url'];
+            $conn->close();
+            header("Location: $url");
+            exit;
+        }
+        $conn->close();
+    }
+    echo "Error updating click counter or fetching URL.";
+    exit;
 }
 ?>
 
@@ -165,9 +155,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo '<t4>Search: '.$result_counter.' Results for "' . $query . '"</t4>';
         echo '<ul>';
         foreach ($results as $result) {
-            echo '<li style="margin-bottom: 20px; display: flex; align-items: center;">';
+            echo '<li style="margin-bottom: 20px; display: flex;">';
             echo '<div>';
-            echo '<a href="' . $result['url'] . '" target="_blank" style="font-size: 1.5rem; color: #007BFF; text-decoration: none;">' . $result['title'] . '</a>';
+            echo '<a href="./?visit=' . $result['ID'] . '" target="_blank" style="font-size: 1.5rem; color: #007BFF; text-decoration: none;">' . $result['title'] . '</a>';
             echo '<p style="margin: 5px 0; color: #222;">' . $result['description'] . '</p>';
             echo '<p style="font-size: 0.8rem; margin: 5px 0; color: #999;">' . $result['url'] .'</p>';
             echo '</div>';

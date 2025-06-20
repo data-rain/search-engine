@@ -7,15 +7,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-function get_title($url){
-  $str = file_get_contents($url);
-  if(strlen($str)>0){
-    $str = trim(preg_replace('/\s+/', ' ', $str)); // supports line breaks inside <title>
-    preg_match("/\<title\>(.*)\<\/title\>/i",$str,$title); // ignore case
-    return $title[1];
-  }
-}
-
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     session_start();
@@ -40,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if(!isset($_SESSION))session_start();
 $captcha_code = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
 $_SESSION['captcha_code'] = $captcha_code;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
