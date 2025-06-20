@@ -32,22 +32,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 else if (isset($_GET['visit']))
 {
     $visit_id = intval($_GET['visit']);
-    if (!$conn->connect_error) {
-        $conn->query("UPDATE search_results SET clicks = clicks + 1 WHERE ID = $visit_id");
-        $res = $conn->query("SELECT url FROM search_results WHERE ID = $visit_id");
-        if ($res && $row = $res->fetch_assoc()) {
-            $url = $row['url'];
-            $conn->close();
-            header("Location: $url");
-            exit;
-        }
-        $conn->close();
+
+    session_start();
+
+    if (!isset($_SESSION['run_once_flags'])) {
+        $_SESSION['run_once_flags'] = [];
     }
+    if (empty($_SESSION['run_once_flags'][$visit_id])) {
+        $conn->query("UPDATE search_results SET clicks = clicks + 1 WHERE ID = $visit_id");
+        $_SESSION['run_once_flags'][$visit_id] = true;
+    }
+    $res = $conn->query("SELECT url FROM search_results WHERE ID = $visit_id");
+    if ($res && $row = $res->fetch_assoc()) {
+        $url = $row['url'];
+        $conn->close();
+        header("Location: $url");
+        exit;
+    }
+    $conn->close();
     echo "Error updating click counter or fetching URL.";
     exit;
 }
-?>
 
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -159,7 +166,7 @@ else if (isset($_GET['visit']))
             echo '<div>';
             echo '<a href="./?visit=' . $result['ID'] . '" target="_blank" style="font-size: 1.5rem; color: #007BFF; text-decoration: none;">' . $result['title'] . '</a>';
             echo '<p style="margin: 5px 0; color: #222;">' . $result['description'] . '</p>';
-            echo '<p style="font-size: 0.8rem; margin: 5px 0; color: #999;">' . $result['url'] .'</p>';
+            echo '<a href="'. $result['url'] .'" style="font-size: 0.8rem; margin: 5px 0; color: #999; text-decoration:none">' . $result['url'] .'</a>';
             echo '</div>';
             echo '</li>';
         }
