@@ -186,13 +186,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-collapse: separate;
             border-spacing: 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-            font-size: 1.04em;
+            font-size: 0.92em;
         }
         th, td {
             padding: 12px 14px;
             border: 1px solid #d0e3fa;
             text-align: left;
             word-break: break-all;
+        }
+        /* Set fixed min-width for # and URL columns */
+        th:nth-child(1), td:nth-child(1) {
+            min-width: 24px;
+            /* width: 16px; */
+            /* max-width: 60px; */
+        }
+        th:nth-child(2), td:nth-child(2) {
+            min-width: 200px;
+            /* width: 200px; */
+            /* max-width: 600px; */
         }
         th {
             background: #f1f7ff;
@@ -243,7 +254,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             echo "<h3>Results : " . count($urls) . " for ".htmlspecialchars($url);
             if (isset($_POST['multi_page'])) {
-                echo " (Pages: " . htmlspecialchars($_POST['start_page']) . " - " . htmlspecialchars($_POST['end_page']) . ")";
+                echo " (Pages: " . htmlspecialchars($start_page) . " - " . htmlspecialchars($end_page) . ")";
             }
             echo "</h3>";
 
