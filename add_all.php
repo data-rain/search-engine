@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background:  #87CEEB;
+            background: #87CEEB;
             min-height: 100vh;
             margin: 0;
             padding: 0;
@@ -168,25 +168,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 8px;
         }
         table {
-            width: 100%;
+            width: 98vw;
+            max-width: 1400px;
+            min-width: 900px;
             background: #fff;
             color: #232946;
-            border-radius: 18px;           /* More rounded corners */
-            margin: 24px 0 0 0;
-            border-collapse: separate;     /* Needed for border-radius to work */
-            border-spacing: 0;             /* Remove spacing between cells */
+            border-radius: 18px;
+            margin: 24px auto 0 auto;
+            border-collapse: separate;
+            border-spacing: 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            font-size: 1.04em;
         }
         th, td {
-            padding: 10px 8px;
+            padding: 12px 14px;
             border: 1px solid #d0e3fa;
             text-align: left;
+            word-break: break-all;
         }
         th {
             background: #f1f7ff;
             color: #007BFF;
         }
-        /* Round only the outer corners of the table */
         table tr:first-child th:first-child { border-top-left-radius: 18px; }
         table tr:first-child th:last-child { border-top-right-radius: 18px; }
         table tr:last-child td:first-child { border-bottom-left-radius: 18px; }
@@ -214,24 +217,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             opacity: 1;
             bottom: 60px;
         }
-        .alert {
-            padding: 14px 18px;
-            border-radius: 8px;
-            font-size: 1.1em;
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 18px;
-        }
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #b7e0c3;
-        }
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
     </style>
 </head>
 <body>
@@ -248,15 +233,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $jsUrls = json_encode($urls);
 
-            // Hide the search form after submission
-            echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    var searchForm = document.getElementById('searchForm');
-                    if (searchForm) searchForm.style.display = 'none';
-                });
-                </script>";
+            echo "<h3>Results : " . count($urls) . " for ".htmlspecialchars($url);
+            if (isset($_POST['multi_page'])) {
+                echo " (Pages: " . htmlspecialchars($_POST['start_page']) . " - " . htmlspecialchars($_POST['end_page']) . ")";
+            }
+            echo "</h3>";
 
-            echo "<h3>Results : " . count($urls) . " for ".htmlspecialchars($url)."</h3>";
             // Table for displaying fetched URLs
             echo '<div style="overflow-x:auto; max-width:100vw; margin:auto;">';
             echo '<table id="resultsTable">';
@@ -280,68 +262,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<script>window.resultUrls = $jsUrls;</script>";
         }
         ?>
-        <!-- Bulk Link Search Form -->
-        <form id="searchForm" method="POST" action="" autocomplete="off">
-            <h2 style="color: #007BFF; margin-bottom: 18px;">Bulk Link Search</h2>
-            <label for="url">URL:</label>
-            <input type="url" id="url" name="url" value="https://" required>
-            <div class="checkbox-row">
-                <input type="checkbox" id="multiPageCheckbox" name="multi_page" onchange="togglePageInputs()">
-                <label for="multiPageCheckbox" class="checkbox-label">
-                    <span class="custom-checkbox"></span>
-                    Enable multiple page support
-                </label>
-            </div>
-            <div id="pageInputs" class="form-row" style="margin-bottom: 8px;">
-                <div>
-                    <label for="start_page">Start Page:</label>
-                    <input type="number" id="start_page" name="start_page" min="1" value="1">
-                </div>
-                <div>
-                    <label for="end_page">End Page:</label>
-                    <input type="number" id="end_page" name="end_page" min="1" value="1">
-                </div>
-            </div>
-            <div class="captcha">
-                <img src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;">
-                <span style="font-size: 0.95em; color: #888;">Click image to refresh</span>
-            </div>
-            <label for="captcha">Enter CAPTCHA:</label>
-            <input type="text" id="captcha" name="captcha" required>
-            <div class="form-actions">
-                <button type="button" onclick="window.location.href='add.php'" class="btn-back">
-                    ← Back
-                </button>
-                <button type="submit" class="btn-blue">
-                    Search for Links
-                </button>
-            </div>
-        </form>
-    </div>
 <script type="text/javascript">
     // Enable/disable page inputs based on checkbox
     function togglePageInputs() {
         var checked = document.getElementById('multiPageCheckbox').checked;
         document.getElementById('pageInputs').style.display = checked ? 'flex' : 'none';
-        // Optionally clear values if disabled
         if (!checked) {
             document.getElementById('start_page').value = '';
             document.getElementById('end_page').value = '';
         }
     }
-    // Refresh CAPTCHA image when clicked
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.captcha img').forEach(function(captchaImg) {
             captchaImg.addEventListener('click', function() {
                 this.src = 'captcha_image.php?' + Date.now();
             });
         });
-        togglePageInputs(); // Set initial state for page inputs
+        togglePageInputs();
     });
 
-    // JS for CAPTCHA refresh, table filling, AJAX save, and toast notifications
     document.addEventListener('DOMContentLoaded', function() {
-        // Refresh save form CAPTCHA on click
         const saveCaptchaImg = document.getElementById('saveCaptchaImg');
         const saveCaptchaInput = document.getElementById('saveCaptchaInput');
         const saveForm = document.getElementById('saveForm');
@@ -353,16 +293,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         }
 
-        // Handle save form submission
         if (saveForm) {
             saveForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveBtn.disabled = true;
 
-                // Gather data from table
                 const table = document.getElementById('resultsTable');
                 const data = [];
-                for (let i = 1; i < table.rows.length; i++) { // skip header row
+                for (let i = 1; i < table.rows.length; i++) {
                     const row = table.rows[i];
                     if(row.cells[2].textContent!="Error" && row.cells[2].textContent!="~" && row.cells[2].textContent!="") {
                         data.push({
@@ -372,7 +310,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         });
                     }
                 }
-                // Send data to save_links.php with CAPTCHA
                 fetch('save_links.php', {
                     method: 'POST',
                     headers: {
@@ -403,7 +340,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         }
 
-        // Fill table with URLs and fetch title/description for each
         if (window.resultUrls && Array.isArray(window.resultUrls)) {
             const table = document.getElementById('resultsTable');
             var idc = 0;
@@ -431,7 +367,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     });
 
-    // Show toast notification
     function showToast(message, color = "#28a745") {
         const toast = document.getElementById("toast");
         toast.textContent = message;
