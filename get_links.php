@@ -1,6 +1,6 @@
 <?php
 /**
- * Extracts all unique domain links (ending with .com, .ir, .org, .ru) from a given URL.
+ * Extracts all unique domain links (ending with .com, .ir, .org, .ru) from a given URL or multiple paginated URLs.
  * Returns only the protocol and domain part, always starting with https:// if missing.
  */
 
@@ -65,12 +65,56 @@ function getAllLinks($url) {
     return array_unique($normalizedLinks);
 }
 
-// If called via GET, output JSON result
-if (isset($_GET['url'])) {
-    $url = $_GET['url'];
-    $links = getAllLinks($url);
+// Accept input from GET or POST
+$input = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
+
+if (isset($input['url'])) {
+
+    $url = $input['url'];
+    $allLinks = [];
+    $debugPages = [];
+
+    // Check if both start_page and end_page are set and valid
+    $hasPaging = isset($input['start_page'], $input['end_page']) 
+        && is_numeric($input['start_page']) 
+        && is_numeric($input['end_page']) 
+        && intval($input['end_page']) >= intval($input['start_page']);
+
+    if ($hasPaging) {
+        $start_page = max(1, intval($input['start_page']));
+        $end_page = max($start_page, intval($input['end_page']));
+        // Crawl each page in the range
+        for ($i = $start_page; $i <= $end_page; $i++) {
+            $pageUrl = $url;
+            if (strpos($url, '?') !== false) {
+                // Replace existing page=... or append new
+                if (preg_match('/([&?])page=\d*/', $url)) {
+                    $pageUrl = preg_replace('/([&?])page=\d*/', '${1}page=' . $i, $url);
+                } else {
+                    $pageUrl .= '&page=' . $i;
+                }
+            } else {
+                // Always add /N (even if ends with /)
+                $pageUrl = rtrim($url, '/');
+                $pageUrl .= '/' . $i;
+            }
+            $debugPages[] = $pageUrl;
+            $links = getAllLinks($pageUrl);
+            $allLinks = array_merge($allLinks, $links);
+        }
+    } else {
+        // No paging: process only the base URL
+        $debugPages[] = $url;
+        $allLinks = getAllLinks($url);
+    }
+
+    // Remove duplicates
+    $allLinks = array_unique($allLinks);
 
     header('Content-Type: application/json');
-    echo json_encode(array_values($links), JSON_PRETTY_PRINT);
+    echo json_encode([
+        'pages_crawled' => $debugPages,
+        'links' => array_values($allLinks)
+    ], JSON_PRETTY_PRINT);
 }
 ?>

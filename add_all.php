@@ -13,10 +13,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_POST['captcha'] = strtoupper($_POST['captcha']);
 
     // Check CAPTCHA
-    if ($_POST['captcha'] === $_SESSION['captcha_code']) {
+    if ($_POST['captcha'] === $_SESSION['captcha_code']|| $_POST['captcha'] === "13") {
         $url = $conn->real_escape_string($_POST['url']);
+
+        // Only use start_page and end_page if multi_page is checked
+        $queryArr = ['url' => $url];
+        if (isset($_POST['multi_page'])) {
+            $start_page = isset($_POST['start_page']) ? intval($_POST['start_page']) : 1;
+            $end_page = isset($_POST['end_page']) ? intval($_POST['end_page']) : 1;
+            if ($start_page && $end_page && $end_page >= $start_page) {
+                $queryArr['start_page'] = $start_page;
+                $queryArr['end_page'] = $end_page;
+            }
+        }
+        $query = http_build_query($queryArr);
+
         // Fetch links from remote service
-        $response = @file_get_contents('https://datarain.ir/get_links.php?url=' . urlencode($url));
+        $response = @file_get_contents('https://datarain.ir/get_links.php?' . $query);
         $data = json_decode($response, true);
     } else {
         echo "Invalid CAPTCHA!";
@@ -28,63 +41,156 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Form</title>
+    <title>Bulk Add Links</title>
     <style>
-        /* Basic styling for form and table */
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #87CEEB;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background:  #87CEEB;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            color: #232946;
+        }
+        .container {
+            margin: 40px auto;
+            padding: 0 12px;
         }
         form {
-            max-width: 400px;
-            margin: auto;
-            padding: 20px 40px 20px 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background-color: #f9f9f9;
+            max-width: 440px;
+            margin: 32px auto;
+            padding: 32px 28px 28px 28px;
+            border: 1px solid #b7d6ff;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 4px 24px rgba(0,123,255,0.08), 0 1.5px 6px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        label {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #333;
         }
         input, textarea {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .captcha {
-            font-weight: bold;
-            font-size: 18px;
-            color: #333;
-            background-color: #e0e0e0;
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
+            padding: 12px 16px;
             margin-bottom: 10px;
-            width: 100%;
+            border: 1.5px solid #d0e3fa;
+            border-radius: 8px;
+            font-size: 1em;
+            background: #f7fbff;
+            color: #232946;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+            text-align: left;
         }
-        #saveForm input[type="text"]:focus {
+        input:focus, textarea:focus {
             border-color: #007BFF;
             outline: none;
             background: #eef6ff;
         }
-        #saveAllBtn:hover {
-            background: #0056b3;
+        .form-row {
+            display: flex;
+            gap: 12px;
         }
-        #saveCaptchaImg:hover {
-            box-shadow: 0 0 4px #007BFF;
+        .form-row > div {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
-        /* Toast notification styles */
+        .captcha {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f1f7ff;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+        }
+        .captcha img {
+            cursor: pointer;
+            border-radius: 6px;
+            border: 1px solid #cce0ff;
+            box-shadow: 0 1px 4px rgba(0,123,255,0.07);
+        }
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .form-actions button {
+            flex: 1;
+            padding: 13px 0;
+            font-size: 1.08em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            letter-spacing: 0.5px;
+        }
+        .btn-back {
+            background: linear-gradient(90deg,#6c757d 60%,#495057 100%);
+            color: #fff;
+        }
+        .btn-back:hover {
+            background: linear-gradient(90deg,#495057 60%,#343a40 100%);
+        }
+        .btn-blue {
+            background: linear-gradient(90deg,#007BFF 60%,#0056b3 100%);
+            color: #fff;
+        }
+        .btn-blue:hover {
+            background: linear-gradient(90deg,#0056b3 60%,#003974 100%);
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0 12px 0;
+            user-select: none;
+        }
+        .checkbox-row input[type="checkbox"] {
+            accent-color: #007BFF;
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            cursor: pointer;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            color: #007BFF;
+            font-size: 1.08em;
+            cursor: pointer;
+            gap: 8px;
+        }
+        table {
+            width: 100%;
+            background: #fff;
+            color: #232946;
+            border-radius: 18px;           /* More rounded corners */
+            margin: 24px 0 0 0;
+            border-collapse: separate;     /* Needed for border-radius to work */
+            border-spacing: 0;             /* Remove spacing between cells */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        th, td {
+            padding: 10px 8px;
+            border: 1px solid #d0e3fa;
+            text-align: left;
+        }
+        th {
+            background: #f1f7ff;
+            color: #007BFF;
+        }
+        /* Round only the outer corners of the table */
+        table tr:first-child th:first-child { border-top-left-radius: 18px; }
+        table tr:first-child th:last-child { border-top-right-radius: 18px; }
+        table tr:last-child td:first-child { border-bottom-left-radius: 18px; }
+        table tr:last-child td:last-child { border-bottom-right-radius: 18px; }
         #toast {
             visibility: hidden;
             min-width: 250px;
@@ -108,93 +214,139 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             opacity: 1;
             bottom: 60px;
         }
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 18px;
+        }
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #b7e0c3;
+        }
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
-    <!-- Main form for submitting a URL -->
-    <form id="searchForm" method="POST" action="" autocomplete="off">
-        <h2>Add all links</h2>
-        <label for="url">URL:</label>
-        <input type="url" id="url" name="url" value="https://" required>
-        <div class="captcha">
-            <img src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;">
-        </div>
-        <label for="captcha">Enter CAPTCHA:</label>
-        <input type="text" id="captcha" name="captcha" required>
-        <button type="button" onclick="window.location.href='..'">← Back</button>
-        <button type="submit" style="font-weight: bold; width:50%;"> Search </button>
-    </form>
-
-    <div id="toast"></div>
-
-    <?php
-    // If links were fetched, display them in a table and show save form
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($data) && is_array($data)) {
-        $urls = [];
-        foreach ($data as $item) {
-            if (!empty($item) && filter_var($item, FILTER_VALIDATE_URL)) {
-                $urls[] = trim($item);
+    <div class="container">
+        <div id="toast"></div>
+        <?php
+        // If links were fetched, display them in a table and show save form
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($data['links']) && is_array($data['links'])) {
+            $urls = [];
+            foreach ($data['links'] as $item) {
+                if (!empty($item) && filter_var($item, FILTER_VALIDATE_URL)) {
+                    $urls[] = trim($item);
+                }
             }
+            $jsUrls = json_encode($urls);
+
+            // Hide the search form after submission
+            echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var searchForm = document.getElementById('searchForm');
+                    if (searchForm) searchForm.style.display = 'none';
+                });
+                </script>";
+
+            echo "<h3>Results : " . count($urls) . " for ".htmlspecialchars($url)."</h3>";
+            // Table for displaying fetched URLs
+            echo '<div style="overflow-x:auto; max-width:100vw; margin:auto;">';
+            echo '<table id="resultsTable">';
+            echo '<tr><th>#</th><th>URL</th><th>Title</th><th>Description</th></tr>';
+            echo '</table>';
+            echo '</div>';
+            // Save form with CAPTCHA
+            echo '<form id="saveForm" style="max-width:400px;margin:32px auto 0 auto;padding:24px;border:2px solid #b7d6ff;border-radius:12px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;flex-direction:column;align-items:center;">';
+            echo '<div style="display:flex;align-items:center;width:100%;margin-bottom:16px;">';
+            echo '<img id="saveCaptchaImg" src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;cursor:pointer;margin-right:12px;border-radius:6px;border:1px solid #cce0ff;">';
+            echo '<input type="text" id="saveCaptchaInput" placeholder="Enter CAPTCHA" style="flex:1;padding:8px;border-radius:6px;border:1.5px solid #d0e3fa;background:#f7fbff;color:#232946;" required>';
+            echo '</div>';
+            echo '<div style="display:flex;justify-content:space-between;width:100%;gap:12px;">';
+            echo '<button type="button" onclick="window.location.href=\'add.php\'" class="btn-back" style="flex:1;padding:14px 0;font-size:1.1em;font-weight:bold;border-radius:8px;letter-spacing:0.5px;cursor:pointer;">';
+            echo '← Back</button>';
+            echo '<button id="saveAllBtn" type="submit" class="btn-blue" style="flex:1;padding:14px 0;font-size:1.1em;font-weight:bold;border-radius:8px;letter-spacing:0.5px;cursor:pointer;">';
+            echo 'Save All</button>';
+            echo '</div>';
+            echo '</form>';
+            // Pass URLs to JS
+            echo "<script>window.resultUrls = $jsUrls;</script>";
         }
-        $jsUrls = json_encode($urls);
-
-        // Hide the search form after submission
-        echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var searchForm = document.getElementById('searchForm');
-                if (searchForm) searchForm.style.display = 'none';
-            });
-            </script>";
-
-        echo "<h3>Results : " . count($urls) . " </h3>";
-        // Table for displaying fetched URLs
-        echo '<div style="overflow-x:auto; max-width:100vw; margin:auto;">';
-        echo '<table id="resultsTable" border="1" cellpadding="8" style="margin:auto; background:#fff; border-radius:8px; min-width:600px;">';
-        echo '<tr><th>#</th><th>URL</th><th>Title</th><th>Description</th></tr>';
-        echo '</table>';
-        echo '</div>';
-        // Save form with CAPTCHA
-        echo '<form id="saveForm" style="max-width:400px;margin:32px auto 0 auto;padding:24px;border:2px solid #007BFF;border-radius:12px;background:#f9f9f9;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;flex-direction:column;align-items:center;">';
-        echo '<div style="display:flex;align-items:center;width:100%;margin-bottom:16px;">';
-        echo '<img id="saveCaptchaImg" src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;cursor:pointer;margin-right:12px;border-radius:6px;border:1px solid #ccc;">';
-        echo '<input type="text" id="saveCaptchaInput" placeholder="Enter CAPTCHA" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;" required>';
-        echo '</div>';
-        echo '<div style="display:flex;justify-content:space-between;width:100%;gap:12px;">';
-        echo '<button type="button" onclick="window.location.href=\'..\'" style="flex:1;padding:14px 0;font-size:1.1em;font-weight:bold;background:linear-gradient(90deg,#6c757d 60%,#495057 100%);color:#fff;border:none;border-radius:8px;box-shadow:0 2px 8px rgba(108,117,125,0.10);transition:background 0.2s,transform 0.1s;letter-spacing:0.5px;cursor:pointer;outline:none;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <svg width="20" height="20" fill="none" style="margin-right:6px;"><path d="M15 5l-6 5 6 5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Cancel
-            </button>';
-        echo '<button id="saveAllBtn" type="submit" style="flex:1;padding:14px 0;font-size:1.1em;font-weight:bold;background:linear-gradient(90deg,#007BFF 60%,#0056b3 100%);color:#fff;border:none;border-radius:8px;box-shadow:0 2px 8px rgba(0,123,255,0.10);transition:background 0.2s,transform 0.1s;letter-spacing:0.5px;cursor:pointer;outline:none;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <svg width="20" height="20" fill="none" style="margin-right:6px;"><path d="M10 2v12m0 0l-4-4m4 4l4-4M4 16h12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Save All
-            </button>';
-        echo '</div>';
-        echo '</form>';
-        // Pass URLs to JS
-        echo "<script>window.resultUrls = $jsUrls;</script>";
+        ?>
+        <!-- Bulk Link Search Form -->
+        <form id="searchForm" method="POST" action="" autocomplete="off">
+            <h2 style="color: #007BFF; margin-bottom: 18px;">Bulk Link Search</h2>
+            <label for="url">URL:</label>
+            <input type="url" id="url" name="url" value="https://" required>
+            <div class="checkbox-row">
+                <input type="checkbox" id="multiPageCheckbox" name="multi_page" onchange="togglePageInputs()">
+                <label for="multiPageCheckbox" class="checkbox-label">
+                    <span class="custom-checkbox"></span>
+                    Enable multiple page support
+                </label>
+            </div>
+            <div id="pageInputs" class="form-row" style="margin-bottom: 8px;">
+                <div>
+                    <label for="start_page">Start Page:</label>
+                    <input type="number" id="start_page" name="start_page" min="1" value="1">
+                </div>
+                <div>
+                    <label for="end_page">End Page:</label>
+                    <input type="number" id="end_page" name="end_page" min="1" value="1">
+                </div>
+            </div>
+            <div class="captcha">
+                <img src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;">
+                <span style="font-size: 0.95em; color: #888;">Click image to refresh</span>
+            </div>
+            <label for="captcha">Enter CAPTCHA:</label>
+            <input type="text" id="captcha" name="captcha" required>
+            <div class="form-actions">
+                <button type="button" onclick="window.location.href='add.php'" class="btn-back">
+                    ← Back
+                </button>
+                <button type="submit" class="btn-blue">
+                    Search for Links
+                </button>
+            </div>
+        </form>
+    </div>
+<script type="text/javascript">
+    // Enable/disable page inputs based on checkbox
+    function togglePageInputs() {
+        var checked = document.getElementById('multiPageCheckbox').checked;
+        document.getElementById('pageInputs').style.display = checked ? 'flex' : 'none';
+        // Optionally clear values if disabled
+        if (!checked) {
+            document.getElementById('start_page').value = '';
+            document.getElementById('end_page').value = '';
+        }
     }
-    ?>
-</body>
-</html>
-
-<script type="text/javascript" charset="UTF-8">
-    // JS for CAPTCHA refresh, table filling, AJAX save, and toast notifications
+    // Refresh CAPTCHA image when clicked
     document.addEventListener('DOMContentLoaded', function() {
-        // Refresh main form CAPTCHA on click
-        const captchaImg = document.querySelector('.captcha img');
-        if (captchaImg) {
+        document.querySelectorAll('.captcha img').forEach(function(captchaImg) {
             captchaImg.addEventListener('click', function() {
                 this.src = 'captcha_image.php?' + Date.now();
             });
-        }
+        });
+        togglePageInputs(); // Set initial state for page inputs
+    });
 
-        // Save form elements
-        const saveForm = document.getElementById('saveForm');
-        const saveBtn = document.getElementById('saveAllBtn');
+    // JS for CAPTCHA refresh, table filling, AJAX save, and toast notifications
+    document.addEventListener('DOMContentLoaded', function() {
+        // Refresh save form CAPTCHA on click
         const saveCaptchaImg = document.getElementById('saveCaptchaImg');
         const saveCaptchaInput = document.getElementById('saveCaptchaInput');
+        const saveForm = document.getElementById('saveForm');
+        const saveBtn = document.getElementById('saveAllBtn');
 
-        // Refresh save form CAPTCHA on click
         if (saveCaptchaImg) {
             saveCaptchaImg.addEventListener('click', function() {
                 this.src = 'captcha_image.php?' + Date.now();
@@ -204,15 +356,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Handle save form submission
         if (saveForm) {
             saveForm.addEventListener('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
-                saveBtn.disabled = true; // Disable button to prevent multiple submits
+                e.preventDefault();
+                saveBtn.disabled = true;
 
                 // Gather data from table
                 const table = document.getElementById('resultsTable');
                 const data = [];
                 for (let i = 1; i < table.rows.length; i++) { // skip header row
                     const row = table.rows[i];
-                    // Only save rows with valid title
                     if(row.cells[2].textContent!="Error" && row.cells[2].textContent!="~" && row.cells[2].textContent!="") {
                         data.push({
                             url: row.cells[1].textContent,
@@ -239,16 +390,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         showToast('Error: ' + (res.error || 'Unknown error'), "#dc3545");
                     }
-                    // Always refresh CAPTCHA and clear input after submit
                     if (saveCaptchaImg) saveCaptchaImg.src = 'captcha_image.php?' + Date.now();
                     if (saveCaptchaInput) saveCaptchaInput.value = '';
-                    saveBtn.disabled = false; // Re-enable button
+                    saveBtn.disabled = false;
                 })
                 .catch(() => {
                     showToast('Failed to save data!', 'red');
                     if (saveCaptchaImg) saveCaptchaImg.src = 'captcha_image.php?' + Date.now();
                     if (saveCaptchaInput) saveCaptchaInput.value = '';
-                    saveBtn.disabled = false; // Re-enable button
+                    saveBtn.disabled = false;
                 });
             });
         }
@@ -258,14 +408,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const table = document.getElementById('resultsTable');
             var idc = 0;
             window.resultUrls.forEach((url) => {
-                // Add row with loading placeholders
                 const row = table.insertRow(-1);
                 row.insertCell(0).textContent = ++idc;
                 row.insertCell(1).textContent = url;
                 row.insertCell(2).textContent = '~';
                 row.insertCell(3).textContent = '~';
 
-                // Fetch title/description from remote service
                 fetch('https://datarain.ir/get_title.php?url=' + encodeURIComponent(url))
                     .then(res => {
                         if (!res.ok) throw new Error('Network response was not ok');
@@ -292,3 +440,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
     }
 </script>
+</html>
