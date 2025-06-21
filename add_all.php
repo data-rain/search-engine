@@ -22,6 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $start_page = isset($_POST['start_page']) ? intval($_POST['start_page']) : 1;
             $end_page = isset($_POST['end_page']) ? intval($_POST['end_page']) : 1;
             if ($start_page && $end_page && $end_page >= $start_page) {
+
+                //limit the end_page to 10 pages
+                if($_POST['captcha']!= "13") {
+                    $dif=$end_page - $start_page;
+                    if ($dif > 10) {
+                        $end_page = $start_page + 10;
+                    }
+                }
                 $queryArr['start_page'] = $start_page;
                 $queryArr['end_page'] = $end_page;
             }
