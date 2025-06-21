@@ -17,7 +17,7 @@ if (isset($_SERVER['HTTP_X_CAPTCHA'])) {
 }
 
 // Validate CAPTCHA
-if ($captcha === '' ||($captcha !== ($_SESSION['captcha_code'] ?? '') && $captcha !== "13")) {
+if ($captcha === '' ||$captcha !== ($_SESSION['captcha_code'] ?? '')) {
     echo json_encode(['success' => false, 'error' => 'Invalid CAPTCHA']);
     exit;
 }

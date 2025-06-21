@@ -16,7 +16,7 @@ $responseMsg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
     $_POST['captcha'] = strtoupper($_POST['captcha']);
     // Check CAPTCHA
-    if ($_POST['captcha'] === $_SESSION['captcha_code'] || $_POST['captcha'] === "13") {
+    if ($_POST['captcha'] === $_SESSION['captcha_code']) {
         if ($_POST['form_type'] === 'single') {
             $title = $conn->real_escape_string($_POST['title']);
             $url = $conn->real_escape_string($_POST['url']);

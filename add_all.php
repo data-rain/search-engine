@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_POST['captcha'] = strtoupper($_POST['captcha']);
 
     // Check CAPTCHA
-    if ($_POST['captcha'] === $_SESSION['captcha_code']|| $_POST['captcha'] === "13") {
+    if ($_POST['captcha'] === $_SESSION['captcha_code']) {
         $url = $conn->real_escape_string($_POST['url']);
 
         // Only use start_page and end_page if multi_page is checked
@@ -24,12 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($start_page && $end_page && $end_page >= $start_page) {
 
                 //limit the end_page to 10 pages
-                if($_POST['captcha']!= "13") {
-                    $dif=$end_page - $start_page;
-                    if ($dif > 10) {
-                        $end_page = $start_page + 10;
-                    }
+                $dif=$end_page - $start_page;
+                if ($dif > 10) {
+                    $end_page = $start_page + 10;
                 }
+
                 $queryArr['start_page'] = $start_page;
                 $queryArr['end_page'] = $end_page;
             }
