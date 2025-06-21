@@ -1,9 +1,10 @@
 <?php
-
 require 'dbpass.php';
 
-if(!isset($_SESSION))session_start();
+// Start session if not already started
+if (!isset($_SESSION)) session_start();
 
+// Connect to the database
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -11,14 +12,16 @@ if ($conn->connect_error) {
 
 $responseMsg = '';
 
-// Handle form submission
+// Handle form submission for adding a single link
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_POST['captcha'] = strtoupper($_POST['captcha']);
+    // Check CAPTCHA
     if ($_POST['captcha'] === $_SESSION['captcha_code']) {
         $title = $conn->real_escape_string($_POST['title']);
         $url = $conn->real_escape_string($_POST['url']);
         $description = $conn->real_escape_string($_POST['description']);
 
+        // Insert new record into the database
         $sql = "INSERT INTO search_results (title, url, description) VALUES ('$title', '$url', '$description')";
         if ($conn->query($sql) === TRUE) {
             $responseMsg = '<div class="alert success">✅ Record added successfully!</div>';
@@ -35,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Form</title>
+    <title>Add Link - DataRain</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -45,8 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         form {
             max-width: 400px;
             margin: auto;
-            padding: 20px;
-            padding-right: 40px;
+            padding: 20px 40px 20px 20px;
             border: 1px solid #ccc;
             border-radius: 10px;
             background-color: #f9f9f9;
@@ -102,62 +104,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+    <!-- Display response message if set -->
     <div id="responseMsg" style="max-width:400px;margin:20px auto 0 auto;">
         <?php if (!empty($responseMsg)) echo $responseMsg; ?>
     </div>
 
+    <!-- Add Link Form -->
     <form method="POST" action="" autocomplete="off">
         <h2>Add link</h2>
+
+        <!-- URL input with "Get info" button -->
         <label for="url">URL:</label>
         <div style="display: flex; gap: 8px; align-items: center;">
             <input type="url" id="url" name="url" value="https://" required style="flex: 1;">
             <button type="button" onclick="fetchTitle()" style="padding: 10px 14px;">Get info</button>
         </div>
 
+        <!-- Title input -->
         <label for="title">Title:</label>
         <input type="text" id="title" name="title" required>
 
+        <!-- Description input -->
         <label for="description">Description:</label>
         <textarea id="description" name="description" rows="4"></textarea>
 
+        <!-- CAPTCHA image and input -->
         <div class="captcha">
             <img src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;">
         </div>
-
         <label for="captcha">Enter CAPTCHA:</label>
         <input type="text" id="captcha" name="captcha" required>
 
+        <!-- Action buttons: Back, Add, Search for Links -->
         <div style="display: flex; gap: 10px; justify-content: space-between; margin-top: 18px;">
             <button type="button" onclick="window.location.href='..'" style="background-color: #6c757d; color: #fff; font-weight: 500;">
-            ← Back
+                ← Back
             </button>
             <button type="submit" style="background-color: #28a745; font-weight: bold;">
-            Add to Database
+                Add to Database
             </button>
+            <!-- This button submits to add_all.php for bulk link search -->
             <button type="submit" formaction="add_all.php" style="background-color: #007BFF; margin-left: 0; font-weight: bold;">
-            Search for Links
+                Search for Links
             </button>
         </div>
-
     </form>
 </body>
 </html>
 
 <script type="text/javascript" charset="UTF-8">
+    // Fetch title and description for the given URL using AJAX
     function fetchTitle() {
-    const url = document.getElementById('url').value;
-    if (!url) return;
-    fetch('get_title.php?url=' + encodeURIComponent(url))
-        .then(response => response.json())
-        .then(data => {
-        if (data.title) {
-            document.getElementById('title').value = data.title;
-        }
-        if (data.description) {
-            document.getElementById('description').value = data.description;
-        }
-        })
-        .catch(() => alert('Error fetching data.'));
+        const url = document.getElementById('url').value;
+        if (!url) return;
+        fetch('get_title.php?url=' + encodeURIComponent(url))
+            .then(response => response.json())
+            .then(data => {
+                if (data.title) {
+                    document.getElementById('title').value = data.title;
+                }
+                if (data.description) {
+                    document.getElementById('description').value = data.description;
+                }
+            })
+            .catch(() => alert('Error fetching data.'));
     }
 
     // Refresh CAPTCHA image when clicked

@@ -1,40 +1,46 @@
 <?php
-
+// Include database credentials
 require 'dbpass.php';
 
+// Connect to the database
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST')
-{
-    if (isset($_POST['query'])) {
-        $query = $conn->real_escape_string($_POST['query']);
+// Pagination setup
+$results_per_page = 100; // Number of results per page
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$offset = ($page - 1) * $results_per_page;
 
-        $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' OR url LIKE '%$query%' OR description LIKE '%$query%' ORDER BY `clicks` DESC";
-        $result = $conn->query($sql);
+// Search logic
+if (isset($_GET['query'])) {
+    $query = $conn->real_escape_string($_GET['query']);
 
-        $results = [];
-        $result_counter=0;
+    // Get total result count for pagination
+    $count_sql = "SELECT COUNT(*) as total FROM search_results WHERE title LIKE '%$query%' OR url LIKE '%$query%' OR description LIKE '%$query%'";
+    $count_result = $conn->query($count_sql);
+    $total_results = ($count_result && $row = $count_result->fetch_assoc()) ? intval($row['total']) : 0;
 
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc())
-            {
-                $results[] = $row;
-                $result_counter++;
-            }
+    // Fetch paginated results
+    $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' OR url LIKE '%$query%' OR description LIKE '%$query%' ORDER BY `clicks` DESC LIMIT $results_per_page OFFSET $offset";
+    $result = $conn->query($sql);
+
+    $results = [];
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $results[] = $row;
         }
-
-        $conn->close();
     }
-}
-else if (isset($_GET['visit']))
-{
-    $visit_id = intval($_GET['visit']);
 
+    $conn->close();
+}
+// Handle link visit (click counter and redirect)
+else if (isset($_GET['visit'])) {
+    $visit_id = intval($_GET['visit']);
     session_start();
 
+    // Prevent multiple increments per session
     if (!isset($_SESSION['run_once_flags'])) {
         $_SESSION['run_once_flags'] = [];
     }
@@ -53,7 +59,6 @@ else if (isset($_GET['visit']))
     echo "Error updating click counter or fetching URL.";
     exit;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -68,8 +73,8 @@ else if (isset($_GET['visit']))
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column; /* Stack elements vertically */
-            align-items: center; /* Center elements horizontally */
+            flex-direction: column;
+            align-items: center;
             height: 100vh;
             background-color: #fff;
             overflow: auto;
@@ -79,13 +84,13 @@ else if (isset($_GET['visit']))
             position: relative;
             z-index: 10;
             color: black;
-            margin-top: 50px; /* Add margin to move content down slightly */
+            margin-top: 50px;
         }
         .search-container h1 {
-            font-size: 3rem; /* Make the title bigger */
+            font-size: 3rem;
             font-weight: bold;
-            color: #007BFF; /* Add a blue color for beauty */
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Add a subtle shadow */
+            color: #007BFF;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
         }
         .search-container input[type="text"] {
             width: 300px;
@@ -122,17 +127,13 @@ else if (isset($_GET['visit']))
             animation: fall linear infinite;
         }
         @keyframes fall {
-            0% {
-                transform: translateY(-100%);
-            }
-            100% {
-                transform: translateY(100vh);
-            }
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
         }
         .search-results {
-            margin-top: 20px; /* Add spacing between search container and results */
+            margin-top: 20px;
             text-align: left;
-            width: 80%; /* Adjust width for better alignment */
+            width: 80%;
         }
         .search-results h2 {
             color: #333;
@@ -140,50 +141,87 @@ else if (isset($_GET['visit']))
     </style>
 </head>
 <body>
+    <!-- Rain animation background -->
     <div class="rain"></div>
 
-    <!-- <a href="./add_all.php" style="position: absolute; top: 10px; left: 10px; text-decoration: none;">
-        <button style="border: none; background-color: #007BFF; color: white; border-radius: 5px; cursor: pointer;">
-            <span style="font-size: 1.1rem; font-weight: bold;"> Add URLs from link </span>
-        </button>
-    </a> -->
-
+    <!-- Add Link button -->
     <a href="./add.php" style="position: absolute; top: 10px; left: 10px; text-decoration: none;">
         <button style="border: none; background-color: #007BFF; color: white; border-radius: 5px; cursor: pointer;">
             <span style="font-size: 1.1rem; font-weight: bold;"> Add Link </span>
         </button>
     </a>
 
+    <!-- Search form -->
     <div class="search-container">
         <a href="./index.php" style="text-decoration:none"><h1>DataRain</h1></a>
-        <form action="" method="POST" style="display: inline-block;" autocomplete="off">
+        <form action="" method="GET" style="display: inline-block;" autocomplete="off">
             <input type="text" name="query" placeholder="Enter your search term..." required autofocus>
             <input type="submit" style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;" value="Search">
         </form>
-
     </div>
+
     <?php
+    // Display search results if available
     if (isset($results)) {
         echo '<div class="search-results">';
-        echo '<t4>Search: '.$result_counter.' Results for "' . $query . '"</t4>';
+        echo '<t4>Search: '.$total_results.' Results for "' . htmlspecialchars($query) . '"</t4>';
         echo '<ul>';
         foreach ($results as $result) {
             echo '<li style="margin-bottom: 20px; display: flex;">';
             echo '<div>';
-            echo '<a href="./?visit=' . $result['ID'] . '" target="_blank" style="font-size: 1.5rem; color: #007BFF; text-decoration: none;">' . $result['title'] . '</a>';
-            echo '<p style="margin: 5px 0; color: #222;">' . $result['description'] . '</p>';
-            echo '<a href="'. $result['url'] .'" style="font-size: 0.8rem; margin: 5px 0; color: #999; text-decoration:none">' . $result['url'] .'</a>';
+            // Title link (click counter)
+            echo '<a href="./?visit=' . $result['ID'] . '" target="_blank" style="font-size: 1.5rem; color: #007BFF; text-decoration: none;">' . htmlspecialchars($result['title']) . '</a>';
+            // Description
+            echo '<p style="margin: 5px 0; color: #222;">' . htmlspecialchars($result['description']) . '</p>';
+            // Direct URL
+            echo '<a href="'. htmlspecialchars($result['url']) .'" style="font-size: 0.8rem; margin: 5px 0; color: #999; text-decoration:none">' . htmlspecialchars($result['url']) .'</a>';
             echo '</div>';
             echo '</li>';
         }
         echo '</ul>';
+
+        // Pagination links
+        $total_pages = ceil($total_results / $results_per_page);
+        if ($total_pages > 1) {
+            echo '<div style="text-align:center;margin:20px 0;">';
+
+            $max_links = 10; // Max page links to show
+            $start = max(1, $page - floor($max_links / 2));
+            $end = min($total_pages, $start + $max_links - 1);
+            if ($end - $start < $max_links - 1) {
+                $start = max(1, $end - $max_links + 1);
+            }
+
+            // Prev link
+            if ($page > 1) {
+                echo "<a href='?page=" . ($page - 1) . "&query=" . urlencode($query) . "' style='margin:0 6px;color:#007BFF;text-decoration:none;'>&laquo; Prev</a>";
+            }
+
+            // Page number links
+            for ($i = $start; $i <= $end; $i++) {
+                if ($i == $page) {
+                    echo "<span style='margin:0 6px;font-weight:bold;color:#007BFF;'>$i</span>";
+                } else {
+                    echo "<a href='?page=$i&query=" . urlencode($query) . "' style='margin:0 6px;color:#007BFF;text-decoration:none;'>$i</a>";
+                }
+            }
+
+            // Next link
+            if ($page < $total_pages) {
+                echo "<a href='?page=" . ($page + 1) . "&query=" . urlencode($query) . "' style='margin:0 6px;color:#007BFF;text-decoration:none;'>Next &raquo;</a>";
+            }
+
+            echo '</div>';
+        }
         echo '</div>';
     }
     ?>
+
+    <!-- Rain animation script -->
     <script>
+        // Simple rain effect
         const rainContainer = document.querySelector('.rain');
         const numberOfDrops = 7;
-
         for (let i = 0; i < numberOfDrops; i++) {
             const drop = document.createElement('div');
             drop.classList.add('drop');

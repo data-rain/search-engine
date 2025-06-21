@@ -1,27 +1,24 @@
 <?php
 require 'dbpass.php';
-
 session_start();
 
+// Connect to database
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST')
-{
-    $_POST['captcha']=strtoupper($_POST['captcha'] );
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $_POST['captcha'] = strtoupper($_POST['captcha']);
 
-    if ($_POST['captcha'] === $_SESSION['captcha_code'])
-    {
+    // Check CAPTCHA
+    if ($_POST['captcha'] === $_SESSION['captcha_code']) {
         $url = $conn->real_escape_string($_POST['url']);
-
+        // Fetch links from remote service
         $response = @file_get_contents('https://datarain.ir/get_links.php?url=' . urlencode($url));
         $data = json_decode($response, true);
-    }
-    else
-    {
+    } else {
         echo "Invalid CAPTCHA!";
     }
 }
@@ -33,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submit Form</title>
     <style>
+        /* Basic styling for form and table */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -41,8 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         form {
             max-width: 400px;
             margin: auto;
-            padding: 20px;
-            padding-right: 40px;
+            padding: 20px 40px 20px 20px;
             border: 1px solid #ccc;
             border-radius: 10px;
             background-color: #f9f9f9;
@@ -114,19 +111,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     </style>
 </head>
 <body>
+    <!-- Main form for submitting a URL -->
     <form id="searchForm" method="POST" action="" autocomplete="off">
         <h2>Add all links</h2>
         <label for="url">URL:</label>
-
         <input type="url" id="url" name="url" value="https://" required>
-
         <div class="captcha">
             <img src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;">
         </div>
-
         <label for="captcha">Enter CAPTCHA:</label>
         <input type="text" id="captcha" name="captcha" required>
-
         <button type="button" onclick="window.location.href='..'">← Back</button>
         <button type="submit" style="font-weight: bold; width:50%;"> Search </button>
     </form>
@@ -134,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     <div id="toast"></div>
 
     <?php
+    // If links were fetched, display them in a table and show save form
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($data) && is_array($data)) {
         $urls = [];
         foreach ($data as $item) {
@@ -143,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         }
         $jsUrls = json_encode($urls);
 
-        //Hide form
+        // Hide the search form after submission
         echo "<script>
             document.addEventListener('DOMContentLoaded', function() {
                 var searchForm = document.getElementById('searchForm');
@@ -152,11 +147,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             </script>";
 
         echo "<h3>Results : " . count($urls) . " </h3>";
-        echo '<div style="overflow-x:auto; max-width:100vw; margin:auto;">'; // Add this wrapper div
+        // Table for displaying fetched URLs
+        echo '<div style="overflow-x:auto; max-width:100vw; margin:auto;">';
         echo '<table id="resultsTable" border="1" cellpadding="8" style="margin:auto; background:#fff; border-radius:8px; min-width:600px;">';
         echo '<tr><th>#</th><th>URL</th><th>Title</th><th>Description</th></tr>';
         echo '</table>';
         echo '</div>';
+        // Save form with CAPTCHA
         echo '<form id="saveForm" style="max-width:400px;margin:32px auto 0 auto;padding:24px;border:2px solid #007BFF;border-radius:12px;background:#f9f9f9;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;flex-direction:column;align-items:center;">';
         echo '<div style="display:flex;align-items:center;width:100%;margin-bottom:16px;">';
         echo '<img id="saveCaptchaImg" src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;cursor:pointer;margin-right:12px;border-radius:6px;border:1px solid #ccc;">';
@@ -173,6 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             </button>';
         echo '</div>';
         echo '</form>';
+        // Pass URLs to JS
         echo "<script>window.resultUrls = $jsUrls;</script>";
     }
     ?>
@@ -180,9 +178,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 </html>
 
 <script type="text/javascript" charset="UTF-8">
-    // Refresh CAPTCHA image when clicked
+    // JS for CAPTCHA refresh, table filling, AJAX save, and toast notifications
     document.addEventListener('DOMContentLoaded', function() {
-        // Refresh main form CAPTCHA
+        // Refresh main form CAPTCHA on click
         const captchaImg = document.querySelector('.captcha img');
         if (captchaImg) {
             captchaImg.addEventListener('click', function() {
@@ -190,26 +188,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             });
         }
 
+        // Save form elements
         const saveForm = document.getElementById('saveForm');
         const saveBtn = document.getElementById('saveAllBtn');
         const saveCaptchaImg = document.getElementById('saveCaptchaImg');
         const saveCaptchaInput = document.getElementById('saveCaptchaInput');
 
+        // Refresh save form CAPTCHA on click
         if (saveCaptchaImg) {
             saveCaptchaImg.addEventListener('click', function() {
                 this.src = 'captcha_image.php?' + Date.now();
             });
         }
 
+        // Handle save form submission
         if (saveForm) {
             saveForm.addEventListener('submit', function(e) {
                 e.preventDefault(); // Prevent default form submission
                 saveBtn.disabled = true; // Disable button to prevent multiple submits
 
+                // Gather data from table
                 const table = document.getElementById('resultsTable');
                 const data = [];
                 for (let i = 1; i < table.rows.length; i++) { // skip header row
                     const row = table.rows[i];
+                    // Only save rows with valid title
                     if(row.cells[2].textContent!="Error" && row.cells[2].textContent!="~" && row.cells[2].textContent!="") {
                         data.push({
                             url: row.cells[1].textContent,
@@ -218,6 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                         });
                     }
                 }
+                // Send data to save_links.php with CAPTCHA
                 fetch('save_links.php', {
                     method: 'POST',
                     headers: {
@@ -249,10 +253,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             });
         }
 
-        // Fetch title/description for each URL and update table
+        // Fill table with URLs and fetch title/description for each
         if (window.resultUrls && Array.isArray(window.resultUrls)) {
             const table = document.getElementById('resultsTable');
-            var idc=0;
+            var idc = 0;
             window.resultUrls.forEach((url) => {
                 // Add row with loading placeholders
                 const row = table.insertRow(-1);
@@ -261,10 +265,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 row.insertCell(2).textContent = '~';
                 row.insertCell(3).textContent = '~';
 
-                // Fetch info via AJAX
+                // Fetch title/description from remote service
                 fetch('https://datarain.ir/get_title.php?url=' + encodeURIComponent(url))
                     .then(res => {
-                        console.log('Fetching:', url, 'Status:', res.status);
                         if (!res.ok) throw new Error('Network response was not ok');
                         return res.json();
                     })
@@ -272,7 +275,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                         row.cells[2].textContent = data.title || '';
                         row.cells[3].textContent = data.description || '';
                     })
-                    .catch((err) => {
+                    .catch(() => {
                         row.cells[2].textContent = 'Error';
                         row.cells[3].textContent = 'Error';
                     });
@@ -280,6 +283,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         }
     });
 
+    // Show toast notification
     function showToast(message, color = "#28a745") {
         const toast = document.getElementById("toast");
         toast.textContent = message;
