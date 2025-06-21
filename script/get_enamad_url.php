@@ -45,16 +45,14 @@ if($tasks[0]['state'] == 'stop') {
     exit;
 }
 
-$start_page = $tasks[0]['done'] + 1;
-if($start_page>$tasks[0]['count']) {
+$page = $tasks[0]['done'] + 1;
+if($page>$tasks[0]['count']) {
     $conn->close();
     exit;
 }
 
 $queryArr = [
-    'url'=> $tasks[0]['url'],
-    'start_page' => $start_page,
-    'end_page' => $start_page
+    'url'=> $tasks[0]['url'].$page
 ];
 
 $query = http_build_query($queryArr);
@@ -80,7 +78,7 @@ if (isset($data['links']) && is_array($data['links'])) {
 
 // $conn->query("UPDATE tasks SET debug = '{$data}' WHERE name = 'enamad'");
 
-$conn->query("UPDATE tasks SET done = $start_page WHERE name = 'enamad'");
+$conn->query("UPDATE tasks SET done = $page WHERE name = 'enamad'");
 $conn->query("UPDATE tasks SET run = run + 1 WHERE name = 'enamad'");
 
 $conn->close();
