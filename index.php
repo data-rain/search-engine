@@ -142,13 +142,13 @@ else if (isset($_GET['visit']))
 <body>
     <div class="rain"></div>
 
-    <a href="./add_all.php" style="position: absolute; top: 10px; left: 10px; text-decoration: none;">
+    <!-- <a href="./add_all.php" style="position: absolute; top: 10px; left: 10px; text-decoration: none;">
         <button style="border: none; background-color: #007BFF; color: white; border-radius: 5px; cursor: pointer;">
             <span style="font-size: 1.1rem; font-weight: bold;"> Add URLs from link </span>
         </button>
-    </a>
+    </a> -->
 
-    <a href="./add.php" style="position: absolute; top: 40px; left: 10px; text-decoration: none;">
+    <a href="./add.php" style="position: absolute; top: 10px; left: 10px; text-decoration: none;">
         <button style="border: none; background-color: #007BFF; color: white; border-radius: 5px; cursor: pointer;">
             <span style="font-size: 1.1rem; font-weight: bold;"> Add Link </span>
         </button>

@@ -102,11 +102,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+    <div id="responseMsg" style="max-width:400px;margin:20px auto 0 auto;">
+        <?php if (!empty($responseMsg)) echo $responseMsg; ?>
+    </div>
+
     <form method="POST" action="" autocomplete="off">
         <h2>Add link</h2>
         <label for="url">URL:</label>
         <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="url" id="url" name="url" value="http://" required style="flex: 1;">
+            <input type="url" id="url" name="url" value="https://" required style="flex: 1;">
             <button type="button" onclick="fetchTitle()" style="padding: 10px 14px;">Get info</button>
         </div>
 
@@ -123,13 +127,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="captcha">Enter CAPTCHA:</label>
         <input type="text" id="captcha" name="captcha" required>
 
-        <button type="submit" style="font-weight: bold;">Add to Database</button>
-        <button type="button" onclick="window.location.href='..'">Back</button>
+        <div style="display: flex; gap: 10px; justify-content: space-between; margin-top: 18px;">
+            <button type="button" onclick="window.location.href='..'" style="background-color: #6c757d; color: #fff; font-weight: 500;">
+            ← Back
+            </button>
+            <button type="submit" style="background-color: #28a745; font-weight: bold;">
+            Add to Database
+            </button>
+            <button type="submit" formaction="add_all.php" style="background-color: #007BFF; margin-left: 0; font-weight: bold;">
+            Search for Links
+            </button>
+        </div>
 
     </form>
-    <div id="responseMsg" style="max-width:400px;margin:20px auto 0 auto;">
-        <?php if (!empty($responseMsg)) echo $responseMsg; ?>
-    </div>
 </body>
 </html>
 

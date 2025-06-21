@@ -127,9 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         <label for="captcha">Enter CAPTCHA:</label>
         <input type="text" id="captcha" name="captcha" required>
 
+        <button type="button" onclick="window.location.href='..'">← Back</button>
         <button type="submit" style="font-weight: bold; width:50%;"> Search </button>
-        <button type="button" onclick="window.location.href='..'">Back</button>
-
     </form>
 
     <div id="toast"></div>
@@ -163,7 +162,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         echo '<img id="saveCaptchaImg" src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;cursor:pointer;margin-right:12px;border-radius:6px;border:1px solid #ccc;">';
         echo '<input type="text" id="saveCaptchaInput" placeholder="Enter CAPTCHA" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;" required>';
         echo '</div>';
-        echo '<button id="saveAllBtn" type="submit" style="width:100%;padding:12px 0;font-size:1.1em;font-weight:bold;background:#007BFF;color:#fff;border:none;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,0.06);transition:background 0.2s;">Save All to Database</button>';
+        echo '<div style="display:flex;justify-content:space-between;width:100%;gap:12px;">';
+        echo '<button type="button" onclick="window.location.href=\'..\'" style="flex:1;padding:14px 0;font-size:1.1em;font-weight:bold;background:linear-gradient(90deg,#6c757d 60%,#495057 100%);color:#fff;border:none;border-radius:8px;box-shadow:0 2px 8px rgba(108,117,125,0.10);transition:background 0.2s,transform 0.1s;letter-spacing:0.5px;cursor:pointer;outline:none;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <svg width="20" height="20" fill="none" style="margin-right:6px;"><path d="M15 5l-6 5 6 5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Cancel
+            </button>';
+        echo '<button id="saveAllBtn" type="submit" style="flex:1;padding:14px 0;font-size:1.1em;font-weight:bold;background:linear-gradient(90deg,#007BFF 60%,#0056b3 100%);color:#fff;border:none;border-radius:8px;box-shadow:0 2px 8px rgba(0,123,255,0.10);transition:background 0.2s,transform 0.1s;letter-spacing:0.5px;cursor:pointer;outline:none;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <svg width="20" height="20" fill="none" style="margin-right:6px;"><path d="M10 2v12m0 0l-4-4m4 4l4-4M4 16h12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Save All
+            </button>';
+        echo '</div>';
         echo '</form>';
         echo "<script>window.resultUrls = $jsUrls;</script>";
     }
