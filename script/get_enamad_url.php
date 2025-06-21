@@ -1,6 +1,6 @@
 <?php
 // Include database credentials
-require 'dbpass.php';
+require_once __DIR__ ."/../dbpass.php";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -49,8 +49,6 @@ if($start_page>$tasks[0]['count']) {
     $conn->close();
     exit;
 }
-
-
 
 $queryArr = [
     'url'=> $tasks[0]['url'],
