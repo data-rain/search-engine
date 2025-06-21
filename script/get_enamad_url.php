@@ -35,6 +35,7 @@ $sql = "SELECT * FROM tasks WHERE name = 'enamad'";
 $result = $conn->query($sql);
 $tasks = $result->fetch_all(MYSQLI_ASSOC);
 if (empty($tasks)) {
+    $conn->query("INSERT INTO tasks (name, url, state, count) VALUES ('enamad', '', 'stop', 0)");
     $conn->close();
     exit;
 }
