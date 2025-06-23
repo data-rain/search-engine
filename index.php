@@ -129,7 +129,7 @@ else if (isset($_GET['visit'])) {
             justify-content: center;
             align-items: center;
             font-family: 'Product Sans', Arial, sans-serif;
-            font-size: 3.2rem;
+            font-size: 4.2rem;
             font-weight: bold;
             letter-spacing: -2px;
             text-shadow: 1px 2px 8px rgba(66,133,244,0.07);
@@ -140,6 +140,7 @@ else if (isset($_GET['visit'])) {
         .logo span {
             font-size: 3.6rem;
             vertical-align: -6px;
+            display: inline-block;
         }
         .search-container {
             display: flex;
@@ -292,19 +293,23 @@ else if (isset($_GET['visit'])) {
                 margin-left: 2px;
                 flex: 0 0 auto;
             }
+            .logo span {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="search-header">
         <div class="logo">
+            <span style="font-size:5rem; vertical-align:-6px;">&#9730;</span>
             DataRain
         </div>
         <a href="./add.php" class="add-link-btn" title="Add Link"><span>+</span></a>
     </div>
     <div class="search-container">
         <form class="search-form" action="" method="GET" autocomplete="off">
-            <input type="text" name="query" placeholder="Search DataRain..." required autofocus value="<?php echo isset($query) ? htmlspecialchars($query) : ''; ?>">
+            <input style="padding-left: 20px;" type="text" name="query" placeholder="Search DataRain..." required autofocus value="<?php echo isset($query) ? htmlspecialchars($query) : ''; ?>">
             <input type="submit" value="Search">
         </form>
     </div>
