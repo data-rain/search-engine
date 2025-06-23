@@ -80,10 +80,10 @@ else if (isset($_GET['visit'])) {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 28px 0 0 0;
+            padding: 48px 0 0 0; /* Increased top padding for more space above logo */
             width: 100%;
             position: relative;
-            background: #f8fafc; /* Match body background */
+            background: #f8fafc;
         }
         .add-link-btn {
             background: #4285f4;
@@ -104,6 +104,8 @@ else if (isset($_GET['visit'])) {
             top: 18px;
             right: 32px;
             text-decoration: none !important;
+            line-height: 1;           /* Ensures vertical centering */
+            padding: 0;               /* Remove default padding */
         }
         .add-link-btn:hover {
             background: #1967d2;
@@ -219,7 +221,7 @@ else if (isset($_GET['visit'])) {
         }
         .pagination {
             text-align: center;
-            margin: 24px 0 0 0;
+            margin: 24px 0 8px 0; /* Add small space below pagination */
         }
         .pagination a, .pagination span {
             display: inline-block;
@@ -249,10 +251,10 @@ else if (isset($_GET['visit'])) {
 </head>
 <body>
     <div class="search-header">
-        <div class="logo" style="color:#4285f4; font-family:'Product Sans',Arial,sans-serif; font-size:3.2rem; font-weight:bold; letter-spacing:-2px; text-shadow:1px 2px 8px rgba(66,133,244,0.10); margin-bottom:0.5rem; user-select:none;">
-            <span style="font-size:3.6rem; vertical-align:-6px;">&#9730;</span> DataRain
+        <div class="logo" style="color:#4285f4; font-family:'Product Sans',Arial,sans-serif; font-size:4.2rem; font-weight:bold; letter-spacing:-2px; text-shadow:1px 2px 8px rgba(66,133,244,0.10); margin-bottom:0.5rem; user-select:none;">
+            <span style="font-size:8rem; vertical-align:-6px;">&#9730;</span> DataRain
         </div>
-        <a href="./add.php"><button class="add-link-btn" title="Add Link">&#43;</button></a>
+        <a href="./add.php" class="add-link-btn" title="Add Link">&#43;</a>
     </div>
     <div class="search-container">
         <form class="search-form" action="" method="GET" autocomplete="off">
