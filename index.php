@@ -13,6 +13,9 @@ $results_per_page = 10; // Google-like: fewer results per page
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $offset = ($page - 1) * $results_per_page;
 
+// Start timer before query
+$search_time_start = microtime(true);
+
 // Search logic
 if (isset($_GET['query'])) {
     $query = $conn->real_escape_string($_GET['query']);
@@ -32,6 +35,9 @@ if (isset($_GET['query'])) {
             $results[] = $row;
         }
     }
+
+    // Calculate search time
+    $search_time = microtime(true) - $search_time_start;
 
     $conn->close();
 }
@@ -267,7 +273,11 @@ else if (isset($_GET['visit'])) {
     // Display search results if available
     if (isset($results)) {
         echo '<div class="search-results">';
-        echo '<h2>' . $total_results . ' results for <b>"' . htmlspecialchars($query) . '"</b></h2>';
+        echo '<h2>' . $total_results . ' results for <b>"' . htmlspecialchars($query) . '"</b>';
+        if (isset($search_time)) {
+            printf(' (%.2f seconds)', $search_time);
+        }
+        echo '</h2>';
         foreach ($results as $result) {
             echo '<div class="result-item">';
             // Title link (click counter)
