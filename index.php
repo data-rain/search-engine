@@ -86,38 +86,39 @@ else if (isset($_GET['visit'])) {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 48px 0 0 0; /* Increased top padding for more space above logo */
+            padding: 48px 0 0 0;
             width: 100%;
             position: relative;
             background: #f8fafc;
         }
         .add-link-btn {
-            background: #fff;              /* Visible white background */
-            color: #4285f4;                /* Icon color */
+            background: #fff;
+            color: #4285f4;
             border: none;
             border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            font-size: 2.2rem;
+            width: 42px;
+            height: 42px;
+            font-size: 1.7rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(66,133,244,0.10); /* Soft shadow for visibility */
+            box-shadow: 0 2px 8px rgba(66,133,244,0.10);
             transition: background 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: absolute;
-            top: 18px;
-            right: 32px;
             text-decoration: none !important;
             line-height: 1;
             padding: 0;
+            position: absolute;
+            top: 18px;
+            right: 32px;
+            z-index: 10;
         }
         .add-link-btn span {
             color: #4285f4;
             position: relative;
-            top: -4px;
-            font-size: 2rem;
+            top: -2px;
+            font-size: 1.5rem;
             display: inline-block;
         }
         .add-link-btn:hover {
@@ -146,6 +147,8 @@ else if (isset($_GET['visit'])) {
             align-items: center;
             margin-top: 30px;
             margin-bottom: 30px;
+            padding-left: 25px;
+            padding-right: 25px;
         }
         .search-form {
             display: flex;
@@ -157,6 +160,8 @@ else if (isset($_GET['visit'])) {
             box-shadow: 0 2px 12px rgba(66,133,244,0.07);
             padding: 8px 18px;
             margin-top: 18px;
+            gap: 8px;
+            position: relative;
         }
         .search-form input[type="text"] {
             flex: 1;
@@ -250,16 +255,50 @@ else if (isset($_GET['visit'])) {
             font-weight: bold;
         }
         @media (max-width: 800px) {
-            .search-results, .search-header { max-width: 98vw; padding: 10px; }
-            .search-form { max-width: 98vw; }
-            .result-item { padding: 18px 8px 12px 8px; }
+            .search-container {
+                padding-left: 4px;
+                padding-right: 4px;
+            }
+            .search-form {
+                max-width: 100vw;
+                width: 100%;
+                padding-left: 2px;
+                padding-right: 2px;
+                box-sizing: border-box;
+                gap: 4px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                overflow: hidden;
+            }
+            .search-form input[type="text"] {
+                font-size: 1.05rem;
+                padding: 8px 6px;
+                min-width: 0;
+                flex: 1 1 0%;
+            }
+            .search-form input[type="submit"] {
+                font-size: 1rem;
+                padding: 8px 10px;
+                min-width: 0;
+                flex: 0 0 auto;
+                margin-left: 0;
+                margin-right: 8px; /* Add space from the right edge */
+            }
+            .add-link-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 1.1rem;
+                margin-left: 2px;
+                flex: 0 0 auto;
+            }
         }
     </style>
 </head>
 <body>
     <div class="search-header">
-        <div class="logo" style="color:#4285f4; font-family:'Product Sans',Arial,sans-serif; font-size:4.2rem; font-weight:bold; letter-spacing:-2px; text-shadow:1px 2px 8px rgba(66,133,244,0.10); margin-bottom:0.5rem; user-select:none;">
-            <span style="font-size:8rem; vertical-align:-6px;">&#9730;</span> DataRain
+        <div class="logo">
+            DataRain
         </div>
         <a href="./add.php" class="add-link-btn" title="Add Link"><span>+</span></a>
     </div>
