@@ -6,8 +6,16 @@
 
 // Main function to fetch and normalize links from a URL
 function getAllLinks($url) {
-    // Fetch HTML content
-    $html = @file_get_contents($url);
+    // Fetch the HTML content using cURL
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    ]);
+    $html = curl_exec($ch);
+    curl_close($ch);
+
     if ($html === false) {
         return [];
     }

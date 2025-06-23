@@ -74,11 +74,13 @@ if (isset($data['links']) && is_array($data['links'])) {
     }
     $stmt->close();
     $insertStmt->close();
+
+    // Only update 'done' if response and insertions were successful
+    $conn->query("UPDATE tasks SET done = $page WHERE name = 'enamad'");
+} else {
+    // Log or handle error: response invalid or no links
 }
 
-// $conn->query("UPDATE tasks SET debug = '{$data}' WHERE name = 'enamad'");
-
-$conn->query("UPDATE tasks SET done = $page WHERE name = 'enamad'");
 $conn->query("UPDATE tasks SET run = run + 1 WHERE name = 'enamad'");
 
 $conn->close();
