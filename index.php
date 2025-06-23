@@ -365,5 +365,28 @@ else if (isset($_GET['visit'])) {
         echo '</div>';
     }
     ?>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    var input = document.querySelector('.search-form input[type="text"]');
+    if (!input) return;
+
+    function setDirection() {
+        const rtlPattern = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+        if (rtlPattern.test(input.value)) {
+            input.style.direction = 'rtl';
+            input.style.textAlign = 'right';
+        } else {
+            input.style.direction = 'ltr';
+            input.style.textAlign = 'left';
+        }
+    }
+
+    // Set direction on input
+    input.addEventListener('input', setDirection);
+
+    // Set direction on page load (for pre-filled value)
+    setDirection();
+});
+</script>
 </body>
 </html>
