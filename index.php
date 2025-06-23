@@ -92,16 +92,16 @@ else if (isset($_GET['visit'])) {
             background: #f8fafc;
         }
         .add-link-btn {
-            background: #fff;
+            background: transparent;
             color: #4285f4;
             border: none;
             border-radius: 50%;
-            width: 42px;
-            height: 42px;
-            font-size: 1.7rem;
+            width: 60px;
+            height: 60px;
+            font-size: 2.7rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(66,133,244,0.10);
+            box-shadow: none;
             transition: background 0.2s;
             display: flex;
             align-items: center;
@@ -110,19 +110,19 @@ else if (isset($_GET['visit'])) {
             line-height: 1;
             padding: 0;
             position: absolute;
-            top: 18px;
-            right: 32px;
+            top: 10px;
+            right: 15px;
             z-index: 10;
         }
         .add-link-btn span {
             color: #4285f4;
             position: relative;
             top: -2px;
-            font-size: 1.5rem;
+            font-size: 2.3rem;
             display: inline-block;
         }
         .add-link-btn:hover {
-            background: #e3f0ff;
+            background: transparent;
         }
         .logo {
             display: flex;
@@ -287,11 +287,12 @@ else if (isset($_GET['visit'])) {
                 margin-right: 8px; /* Add space from the right edge */
             }
             .add-link-btn {
-                width: 32px;
-                height: 32px;
-                font-size: 1.1rem;
-                margin-left: 2px;
-                flex: 0 0 auto;
+                width: 42px;
+                height: 42px;
+                font-size: 1.7rem;
+            }
+            .add-link-btn span {
+                font-size: 1.5rem;
             }
             .logo span {
                 display: none;
@@ -309,7 +310,7 @@ else if (isset($_GET['visit'])) {
     </div>
     <div class="search-container">
         <form class="search-form" action="" method="GET" autocomplete="off">
-            <input style="padding-left: 20px;" type="text" name="query" placeholder="Search DataRain..." required autofocus value="<?php echo isset($query) ? htmlspecialchars($query) : ''; ?>">
+            <input style="padding-left: 20px;" type="text" name="query" placeholder="Search ..." required autofocus value="<?php echo isset($query) ? htmlspecialchars($query) : ''; ?>">
             <input type="submit" value="Search">
         </form>
     </div>
