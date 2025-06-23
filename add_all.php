@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: #87CEEB;
+            background: #f8fafc;
             min-height: 100vh;
             margin: 0;
             padding: 0;

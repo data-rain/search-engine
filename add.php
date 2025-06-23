@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: #87CEEB;
+            background: #f8fafc;
             min-height: 100vh;
             margin: 0;
             padding: 0;
@@ -181,10 +181,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             display: flex;
             align-items: center;
             gap: 12px;
-            background: #f1f7ff;
-            border-radius: 10px;
-            padding: 12px 18px;
-            box-shadow: 0 1px 4px rgba(0,123,255,0.04);
+            background: #fff; /* Match card background */
+            border-radius: 18px; /* Match card border radius */
+            padding: 18px 24px;
+            box-shadow: 0 4px 24px rgba(0,123,255,0.08), 0 1.5px 6px rgba(0,0,0,0.03); /* Match card shadow */
         }
         .form-type-select label {
             margin-bottom: 0;
