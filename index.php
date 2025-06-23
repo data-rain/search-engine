@@ -86,8 +86,8 @@ else if (isset($_GET['visit'])) {
             background: #f8fafc;
         }
         .add-link-btn {
-            background: #4285f4;
-            color: #fff;
+            background: #fff;              /* Visible white background */
+            color: #4285f4;                /* Icon color */
             border: none;
             border-radius: 50%;
             width: 48px;
@@ -95,7 +95,7 @@ else if (isset($_GET['visit'])) {
             font-size: 2.2rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(66,133,244,0.07);
+            box-shadow: 0 2px 8px rgba(66,133,244,0.10); /* Soft shadow for visibility */
             transition: background 0.2s;
             display: flex;
             align-items: center;
@@ -104,17 +104,18 @@ else if (isset($_GET['visit'])) {
             top: 18px;
             right: 32px;
             text-decoration: none !important;
-            line-height: 1;           /* Ensures vertical centering */
-            padding: 0;               /* Remove default padding */
+            line-height: 1;
+            padding: 0;
+        }
+        .add-link-btn span {
+            color: #4285f4;
+            position: relative;
+            top: -4px;
+            font-size: 2rem;
+            display: inline-block;
         }
         .add-link-btn:hover {
-            background: #1967d2;
-        }
-        .add-link-btn:focus {
-            outline: none;
-        }
-        a.add-link-btn, a.add-link-btn:visited, a.add-link-btn:active {
-            text-decoration: none !important;
+            background: #e3f0ff;
         }
         .logo {
             display: flex;
@@ -254,7 +255,7 @@ else if (isset($_GET['visit'])) {
         <div class="logo" style="color:#4285f4; font-family:'Product Sans',Arial,sans-serif; font-size:4.2rem; font-weight:bold; letter-spacing:-2px; text-shadow:1px 2px 8px rgba(66,133,244,0.10); margin-bottom:0.5rem; user-select:none;">
             <span style="font-size:8rem; vertical-align:-6px;">&#9730;</span> DataRain
         </div>
-        <a href="./add.php" class="add-link-btn" title="Add Link">&#43;</a>
+        <a href="./add.php" class="add-link-btn" title="Add Link"><span>+</span></a>
     </div>
     <div class="search-container">
         <form class="search-form" action="" method="GET" autocomplete="off">
