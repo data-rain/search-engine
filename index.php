@@ -139,7 +139,8 @@ else if (isset($_GET['visit'])) {
         echo '</div>';
     }
     ?>
-    <script>
+</body>
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     var input = document.querySelector('.search-form input[type="text"]');
     if (!input) return;
@@ -162,5 +163,4 @@ document.addEventListener('DOMContentLoaded', function() {
     setDirection();
 });
 </script>
-</body>
 </html>
