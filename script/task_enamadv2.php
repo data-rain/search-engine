@@ -114,5 +114,8 @@ if (isset($data['links']) && is_array($data['links']) && count($data['links']) >
 
 $conn->query("UPDATE tasks SET run = run + 1 WHERE name = '$task_name'");
 $conn->close();
-exit("Done.");
+
+// echo '<script>window.location.reload();</script>Done.';
+echo 'Done.';
+exit;
 ?>
