@@ -1,51 +1,60 @@
 <?php
 require 'dbpass.php';
 
-// Connect to the database
 $conn = @new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Pagination setup
-$results_per_page = 10; // Google-like: fewer results per page
+$results_per_page = 10;
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $offset = ($page - 1) * $results_per_page;
 
-// Start timer before query
 $search_time_start = microtime(true);
 
-// Search logic
 if (isset($_GET['query'])) {
     $query = $conn->real_escape_string($_GET['query']);
+    $results = [];
+    $total_results = 0;
 
-    // Get total result count for pagination
-    $count_sql = "SELECT COUNT(*) as total FROM search_results WHERE title LIKE '%$query%' OR url LIKE '%$query%' OR description LIKE '%$query%'";
+    $count_sql = "SELECT COUNT(*) as total FROM search_results WHERE MATCH(title, url, description) AGAINST ('$query' IN NATURAL LANGUAGE MODE)";
     $count_result = $conn->query($count_sql);
-    $total_results = ($count_result && $row = $count_result->fetch_assoc()) ? intval($row['total']) : 0;
+    if ($count_result && $row = $count_result->fetch_assoc()) {
+        $total_results = intval($row['total']);
+    }
 
-    // Fetch paginated results
-    $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE '%$query%' OR url LIKE '%$query%' OR description LIKE '%$query%' ORDER BY `clicks` DESC LIMIT $results_per_page OFFSET $offset";
+    $sql = "SELECT ID, title, url, description FROM search_results WHERE MATCH(title, url, description) AGAINST ('$query' IN NATURAL LANGUAGE MODE) ORDER BY clicks DESC LIMIT $results_per_page OFFSET $offset";
     $result = $conn->query($sql);
 
-    $results = [];
     if ($result && $result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             $results[] = $row;
         }
+    } else {
+        $sql_fallback = "SELECT ID, title, url, description FROM search_results";
+        $fallback_result = $conn->query($sql_fallback);
+        if ($fallback_result) {
+            while ($row = $fallback_result->fetch_assoc()) {
+                similar_text(strtolower($query), strtolower($row['title'] . ' ' . $row['description']), $percent);
+                if ($percent > 60) {
+                    $row['score'] = $percent;
+                    $results[] = $row;
+                }
+            }
+            usort($results, function($a, $b) {
+                return $b['score'] <=> $a['score'];
+            });
+            $total_results = count($results);
+            $results = array_slice($results, $offset, $results_per_page);
+        }
     }
 
-    // Calculate search time
     $search_time = microtime(true) - $search_time_start;
-
     $conn->close();
-}
-// Handle link visit (click counter and redirect)
-else if (isset($_GET['visit'])) {
+} elseif (isset($_GET['visit'])) {
     $visit_id = intval($_GET['visit']);
     session_start();
 
-    // Prevent multiple increments per session
     if (!isset($_SESSION['run_once_flags'])) {
         $_SESSION['run_once_flags'] = [];
     }
@@ -89,7 +98,6 @@ else if (isset($_GET['visit'])) {
         </form>
     </div>
     <?php
-    // Display search results if available
     if (isset($results)) {
         echo '<div class="search-results">';
         echo '<h2>' . $total_results . ' results for <b>"' . htmlspecialchars($query) . '"</b>';
@@ -99,30 +107,24 @@ else if (isset($_GET['visit'])) {
         echo '</h2>';
         foreach ($results as $result) {
             echo '<div class="result-item">';
-            // Title link (click counter)
             echo '<a href="./?visit=' . $result['ID'] . '" target="_blank" class="result-title">' . htmlspecialchars($result['title']) . '</a>';
-            // Description
             echo '<div class="result-desc">' . htmlspecialchars($result['description']) . '</div>';
-            // Direct URL
             echo '<a href="'. htmlspecialchars($result['url']) .'" class="result-url" target="_blank">' . htmlspecialchars($result['url']) . '</a>';
             echo '</div>';
         }
 
-        // Pagination links
         $total_pages = ceil($total_results / $results_per_page);
         if ($total_pages > 1) {
             echo '<div class="pagination">';
-            $max_links = 9; // Max page links to show
+            $max_links = 9;
             $start = max(1, $page - floor($max_links / 2));
             $end = min($total_pages, $start + $max_links - 1);
             if ($end - $start < $max_links - 1) {
                 $start = max(1, $end - $max_links + 1);
             }
-            // Prev link
             if ($page > 1) {
                 echo "<a href='?page=" . ($page - 1) . "&query=" . urlencode($query) . "'>&laquo;</a>";
             }
-            // Page number links
             for ($i = $start; $i <= $end; $i++) {
                 if ($i == $page) {
                     echo "<span class='active'>$i</span>";
@@ -130,7 +132,6 @@ else if (isset($_GET['visit'])) {
                     echo "<a href='?page=$i&query=" . urlencode($query) . "'>$i</a>";
                 }
             }
-            // Next link
             if ($page < $total_pages) {
                 echo "<a href='?page=" . ($page + 1) . "&query=" . urlencode($query) . "'>&raquo;</a>";
             }
@@ -156,10 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Set direction on input
     input.addEventListener('input', setDirection);
-
-    // Set direction on page load (for pre-filled value)
     setDirection();
 });
 </script>
