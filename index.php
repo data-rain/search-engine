@@ -36,7 +36,7 @@ if (isset($_GET['query'])) {
         if ($fallback_result) {
             while ($row = $fallback_result->fetch_assoc()) {
                 similar_text(strtolower($query), strtolower($row['title'] . ' ' . $row['description']), $percent);
-                if ($percent > 60) {
+                if ($percent > 70) {
                     $row['score'] = $percent;
                     $results[] = $row;
                 }
