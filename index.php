@@ -102,7 +102,7 @@ if (isset($_GET['query'])) {
         echo '<div class="search-results">';
         echo '<h2>' . $total_results . ' results for <b>"' . htmlspecialchars($query) . '"</b>';
         if (isset($search_time)) {
-            printf(' (%.2f seconds)', $search_time);
+            printf(' (%.3f seconds)', $search_time);
         }
         echo '</h2>';
         foreach ($results as $result) {
