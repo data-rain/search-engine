@@ -146,10 +146,15 @@ if ($data === false || empty($data)) {
     exit("Failed to fetch remote data.");
 }
 
-if (is_array($data) && count($data) > 0) {
+if (!empty($data)) {
+
+    $stmt = $conn->prepare("INSERT INTO $table_name (url) VALUES (?)");
     foreach ($data as $url) {
-        $conn->query("INSERT INTO $table_name (url) VALUE ('$url')");
+        $stmt->bind_param("s", $url);
+        $stmt->execute();
     }
+    $stmt->close();
+
     $conn->query("UPDATE tasks SET done = $page WHERE name = '$task_name'");
 } else {
     $conn->query("UPDATE tasks SET debug = 'No valid links or bad response on page $page' WHERE name = '$task_name'");
