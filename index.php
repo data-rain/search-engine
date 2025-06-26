@@ -15,7 +15,7 @@ $search_time_start = microtime(true);
 if (isset($_GET['query'])) {
     $query = $_GET['query'];
     $like_query = '%' . $query . '%';
-    $boolean_query = $query . '*';
+    $boolean_query ='*'. $query . '*';
 
     $results = [];
     $total_results = 0;
