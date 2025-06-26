@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>تست استخراج اطلاعات صفحه</title>
+    <title>Content Extraction API Test</title>
     <style>
         body {
             font-family: sans-serif;
             padding: 20px;
-            direction: rtl;
+            direction: ltr;
             background: #f0f0f0;
         }
         input, button {
@@ -26,10 +26,10 @@
     </style>
 </head>
 <body>
-    <h1>🧪 تست API استخراج محتوا</h1>
-    <input type="text" id="urlInput" placeholder="مثلاً: https://example.com">
-    <button onclick="fetchData()">استخراج</button>
-    <pre id="result">نتیجه در اینجا نمایش داده می‌شود...</pre>
+    <h1>🧪 Content Extraction API Test</h1>
+    <input type="text" id="urlInput" placeholder="e.g. https://example.com">
+    <button onclick="fetchData()">Extract</button>
+    <pre id="result">Results will appear here...</pre>
 
     <script>
         async function fetchData() {
@@ -37,11 +37,11 @@
             const resultBox = document.getElementById('result');
 
             if (!url.trim()) {
-                resultBox.textContent = 'لطفاً یک URL وارد کنید.';
+                resultBox.textContent = 'Please enter a URL.';
                 return;
             }
 
-            resultBox.textContent = '⏳ در حال پردازش...';
+            resultBox.textContent = '⏳ Processing...';
 
             try {
                 const response = await fetch('https://datarain.ir/api/extract.php', {
@@ -55,13 +55,13 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    resultBox.textContent = `❌ خطا: ${data.error || 'نامشخص'}`;
+                    resultBox.textContent = `❌ Error: ${data.error || 'Unknown error'}`;
                 } else {
                     resultBox.textContent = JSON.stringify(data, null, 2);
                 }
 
             } catch (err) {
-                resultBox.textContent = '⚠️ خطا در ارتباط با سرور یا مرورگر: ' + err.message;
+                resultBox.textContent = '⚠️ Network or server error: ' + err.message;
             }
         }
     </script>

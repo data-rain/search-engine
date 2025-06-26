@@ -82,6 +82,9 @@ if (isset($_GET['query'])) {
     <title>DataRain Search Engine</title>
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1976d2">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
     <div class="search-header">
@@ -160,5 +163,15 @@ document.addEventListener('DOMContentLoaded', function() {
     input.addEventListener('input', setDirection);
     setDirection();
 });
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(function() {
+        console.log("✅ Service Worker registered");
+      })
+      .catch(function(error) {
+        console.error("❌ Service Worker registration failed:", error);
+      });
+}
 </script>
 </html>
