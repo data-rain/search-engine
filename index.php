@@ -81,17 +81,34 @@ else if (isset($_GET['visit']))
     if (!isset($_SESSION['run_once_flags'])) {
         $_SESSION['run_once_flags'] = [];
     }
+
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
     if (empty($_SESSION['run_once_flags'][$visit_id])) {
-        $conn->query("UPDATE search_results SET clicks = clicks + 1 WHERE ID = $visit_id");
+        $stmt = $conn->prepare("UPDATE search_results SET clicks = clicks + 1 WHERE ID = ?");
+        $stmt->bind_param('i', $visit_id);
+        $stmt->execute();
+        $stmt->close();
+
         $_SESSION['run_once_flags'][$visit_id] = true;
     }
-    $res = $conn->query("SELECT url FROM search_results WHERE ID = $visit_id");
+
+    $stmt = $conn->prepare("SELECT url FROM search_results WHERE ID = ?");
+    $stmt->bind_param('i', $visit_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
+
     if ($res && $row = $res->fetch_assoc()) {
         $url = $row['url'];
+        $stmt->close();
         $conn->close();
         header("Location: $url");
         exit;
     }
+
+    $stmt->close();
     $conn->close();
     echo "Error updating click counter or fetching URL.";
     exit;
