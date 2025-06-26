@@ -13,45 +13,68 @@ $offset = ($page - 1) * $results_per_page;
 $search_time_start = microtime(true);
 
 if (isset($_GET['query'])) {
-    $query = $conn->real_escape_string($_GET['query']);
+    $query = $_GET['query'];
+    $like_query = '%' . $query . '%';
+    $boolean_query = $query . '*';
+
     $results = [];
     $total_results = 0;
 
-    $count_sql = "SELECT COUNT(*) as total FROM search_results WHERE MATCH(title, url, description) AGAINST ('$query' IN NATURAL LANGUAGE MODE)";
-    $count_result = $conn->query($count_sql);
+    // 1. جستجوی ساده با LIKE روی title
+    $count_sql = "SELECT COUNT(*) as total FROM search_results WHERE title LIKE ?";
+    $stmt = $conn->prepare($count_sql);
+    $stmt->bind_param('s', $like_query);
+    $stmt->execute();
+    $count_result = $stmt->get_result();
     if ($count_result && $row = $count_result->fetch_assoc()) {
         $total_results = intval($row['total']);
     }
+    $stmt->close();
 
-    $sql = "SELECT ID, title, url, description FROM search_results WHERE MATCH(title, url, description) AGAINST ('$query' IN NATURAL LANGUAGE MODE) ORDER BY clicks DESC LIMIT $results_per_page OFFSET $offset";
-    $result = $conn->query($sql);
-
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $results[] = $row;
-        }
-    } else {
-        $sql_fallback = "SELECT ID, title, url, description FROM search_results";
-        $fallback_result = $conn->query($sql_fallback);
-        if ($fallback_result) {
-            while ($row = $fallback_result->fetch_assoc()) {
-                similar_text(strtolower($query), strtolower($row['title'] . ' ' . $row['description']), $percent);
-                if ($percent > 70) {
-                    $row['score'] = $percent;
-                    $results[] = $row;
-                }
+    if ($total_results > 0) {
+        // اگر نتیجه داشتیم، نتایج رو از LIKE بگیریم
+        $sql = "SELECT ID, title, url, description FROM search_results WHERE title LIKE ? ORDER BY clicks DESC LIMIT ? OFFSET ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('sii', $like_query, $results_per_page, $offset);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $results[] = $row;
             }
-            usort($results, function($a, $b) {
-                return $b['score'] <=> $a['score'];
-            });
-            $total_results = count($results);
-            $results = array_slice($results, $offset, $results_per_page);
         }
+        $stmt->close();
+    } else {
+        // 2. اگر نتیجه نداشتیم، جستجوی full-text با MATCH AGAINST
+        $count_sql = "SELECT COUNT(*) as total FROM search_results WHERE MATCH(title, url, description) AGAINST (? IN BOOLEAN MODE)";
+        $stmt = $conn->prepare($count_sql);
+        $stmt->bind_param('s', $boolean_query);
+        $stmt->execute();
+        $count_result = $stmt->get_result();
+        if ($count_result && $row = $count_result->fetch_assoc()) {
+            $total_results = intval($row['total']);
+        }
+        $stmt->close();
+
+        $sql = "SELECT ID, title, url, description FROM search_results WHERE MATCH(title, url, description) AGAINST (? IN BOOLEAN MODE) ORDER BY clicks DESC LIMIT ? OFFSET ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('sii', $boolean_query, $results_per_page, $offset);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $results[] = $row;
+            }
+        }
+        $stmt->close();
     }
 
     $search_time = microtime(true) - $search_time_start;
     $conn->close();
-} elseif (isset($_GET['visit'])) {
+}
+else if (isset($_GET['visit']))
+{
     $visit_id = intval($_GET['visit']);
     session_start();
 
