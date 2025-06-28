@@ -246,9 +246,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
                 </button>
             </div>
             <label for="title">Title:</label>
-            <input type="text" id="title" name="title" required disabled>
+            <input type="text" id="title" name="title" required>
             <label for="description">Description:</label>
-            <textarea id="description" name="description" rows="4" disabled></textarea>
+            <textarea id="description" name="description" rows="4"></textarea>
             <div class="captcha">
                 <img src="captcha_image.php" alt="CAPTCHA" style="vertical-align:middle;">
                 <span style="font-size: 0.95em; color: #888;">Click image to refresh</span>
@@ -337,7 +337,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             .then(data => {
                 if (data.title) {
                     document.getElementById('title').value = data.title;
-                    document.getElementById('url').setAttribute("disabled", "true");
                 }
                 if (data.description) {
                     document.getElementById('description').value = data.description;
