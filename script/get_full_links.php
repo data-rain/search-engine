@@ -16,9 +16,6 @@ function getAllLinks($url) {
     $html = curl_exec($ch);
     curl_close($ch);
 
-    echo $html;
-    exit;
-
     if ($html === false) {
         return [];
     }
