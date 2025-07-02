@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             $description = $conn->real_escape_string($_POST['description']);
 
             // Insert new record into the database
-            $sql = "INSERT INTO search_results (title, url, description) VALUES ('$title', '$url', '$description')";
+            $sql = "INSERT INTO search_results (title, url, description, clicks) VALUES ('$title', '$url', '$description',0)";
             if ($conn->query($sql) === TRUE) {
                 $responseMsg = '<div class="alert success">✅ Record added successfully!</div>';
             } else {
@@ -256,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             <label for="captcha">Enter CAPTCHA:</label>
             <input type="text" id="captcha" name="captcha" required>
             <div class="form-actions">
-                <button type="button" onclick="window.location.href='..'" class="btn-back">
+                <button type="button" onclick="window.location.href='./'" class="btn-back">
                     ← Back
                 </button>
                 <button type="submit" class="btn-green">
